@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+ENV/
+env/
+.env
+
+# Model weights (large files, gated access)
+backend/data/model_weights/*.pt
+backend/data/model_weights/*.onnx
+!backend/data/model_weights/.gitkeep
+
+# Generated outputs
+backend/data/output/*.json
+backend/data/output/*.sdf
+backend/data/output/*.mol
+!backend/data/output/.gitkeep
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+*.ipynb
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.*.local
+
+# IDE specific
+*.code-workspace
+
+# macOS
+.AppleDouble
+.LSOverride

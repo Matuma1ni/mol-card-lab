@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mol-card-gen"
+version = "0.0.1"
+description = "Molecular conformer generation + card UI prototype"
+authors = [{name = "Development Team"}]
+requires-python = ">=3.10"
+dependencies = [
+    "mlconfgen[torch]>=0.4.3",
+    "rdkit>=2025.3.4",
+    "numpy>=1.24.3,<2; python_version < '3.13'",
+    "numpy>=2.3,<3; python_version >= '3.13'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+]
+
+[tool.setuptools]
+packages = ["src"]

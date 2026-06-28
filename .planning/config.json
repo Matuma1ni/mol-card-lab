@@ -1,0 +1,9 @@
+{
+  "projectName": "mol-card-lab",
+  "workflow": "gsd-new-project",
+  "auto": false,
+  "createdAt": "2026-06-22T00:00:00Z",
+  "phaseFocus": "integration spike",
+  "audience": "Internal prototype team",
+  "primaryGoal": "Validate mlconfgen locally and preserve 3D conformer geometry through a minimal frontend prototype"
+}

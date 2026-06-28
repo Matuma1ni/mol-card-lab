@@ -1,0 +1,48 @@
+.molecule-viewer-3d {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #eef2ea;
+}
+
+.viewer-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.placeholder-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  max-width: 80%;
+  text-align: center;
+}
+
+.placeholder-title {
+  color: #20231f;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.placeholder-subtitle {
+  color: #667063;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.placeholder-meta {
+  max-width: 100%;
+  color: #557c62;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

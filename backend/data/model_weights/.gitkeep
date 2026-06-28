@@ -1,0 +1,7 @@
+# Placeholder for model weights directory.
+# User must download weights from:
+# https://huggingface.co/Membrizard/ml_conformer_generator
+#
+# Files needed:
+# - edm_moi_chembl_15_39.pt (95.7 MB)
+# - adj_mat_seer_chembl_15_39.pt (87.2 MB)
