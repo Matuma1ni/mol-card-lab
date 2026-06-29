@@ -3,3 +3,6 @@ rdkit==2025.3.4
 numpy>=1.24.3,<2; python_version < "3.13"
 numpy>=2.3,<3; python_version >= "3.13"
 pytest==7.4.0
+fastapi==0.138.1
+uvicorn==0.49.0
+httpx==0.28.1
