@@ -1,132 +1,98 @@
 # mol-card-lab
 
-A prototype UI for viewing 3D molecular conformers generated via machine learning as collectible card game-style cards.
+An exploratory prototype that generates 3D molecular conformers with `ml_conformer_generator` and presents them as collectible-style React cards.
 
-## Project Overview
+## Phase 2 architecture
 
-This is an exploratory spike combining:
-- **Backend**: Python + `ml_conformer_generator` (EDM-based 3D conformer generation from reference molecules)
-- **Frontend**: React + TypeScript + Vite with a placeholder for future 3Dmol.js visualization
-- **Goal**: Prove the generator works locally and build a clean, maintainable card-based UI for browsing generated molecules
+- Python remains the generation runtime.
+- `backend/src/generation_service.py` is shared by the CLI and local FastAPI wrapper.
+- `POST /generate` accepts optional `referenceMolPath`, `nSamples`, and `variance` fields.
+- `referenceMolPath` must be a relative `.mol` path beneath `backend/data/reference_molecules/`.
+- A missing path uses `DEMO_SMILES` only as an explicitly labeled smoke-test fallback.
+- MolBlock is the primary 3D geometry representation; coordinates are derived convenience data.
+- The React viewer confirms that MolBlock geometry loaded. Real 3Dmol.js rendering remains deferred.
 
-## Architecture & Decision Records
+This phase is local-only and single-user. It does not add uploads, persistence, queues, authentication, deployment, identity lookup, or browser-side generation.
 
-The main Phase 1 decisions are now captured in docs under [docs/architecture/README.md](docs/architecture/README.md), including the newest ADR for reference-molecule handling:
+## Setup
 
-- [docs/architecture/ADR-0001-reference-molecule-input.md](docs/architecture/ADR-0001-reference-molecule-input.md)
-
-These notes are intended to make onboarding easier and to keep the project aligned with the implementation choices in the backend and frontend.
-
-## Architecture (First Spike)
-
-### Backend (Python)
-1. **`generate_demo.py`**: Standalone script to test the `mlconfgen` library locally
-   - Loads a local `.mol` reference via `--reference-mol` / `-r` as the preferred Phase 1 input
-   - Falls back to embedded `DEMO_SMILES` only for smoke testing
-   - Loads pre-downloaded model weights
-   - Generates N conformers with variance
-   - Serializes to JSON (MolBlock + coordinates)
-   - Outputs to `backend/data/output/`
-   - Records `reference_source: mol_file` with `reference_3d_geometry: provided` or `embedded` for `.mol` inputs
-   - Records `reference_source: demo_smiles` and `reference_3d_geometry: embedded` for the smoke-test fallback
-
-2. **Serialization**: Each conformer stored as:
-   ```json
-   {
-     "id": "conformer_0",
-     "smiles": "...",
-     "molBlock": "...",
-     "coordinates": [...],
-     "metadata": {...}
-   }
-   ```
-
-### Frontend (React + Vite)
-1. **Mocked data**: Realistic molecules generated once offline from backend
-2. **`MoleculeCard.tsx`**: Collectible card component with molecule info
-3. **`MoleculeViewer3D.tsx`**: Placeholder viewer for future 3Dmol.js integration
-4. **`App.tsx`**: Card grid/list UI
-
-RDKit.js/WebAssembly is a possible frontend-only enhancement for rendering a 2D SVG depiction from a SMILES string, useful as collectible card artwork. It does not replace the Python generation path, does not connect to `ml_conformer_generator`, and does not preserve generated 3D conformer coordinates. Backend output must continue to preserve `molBlock` for future real 3D rendering, likely with 3Dmol.js.
-
-## Setup Instructions
-
-### Prerequisites
-- Python 3.10+
-- Node.js 18+ / npm
-- GPU recommended for `mlconfgen` (CPU will work but slower)
-
-### Backend Setup
+Prerequisites: Python 3.10+, Node.js 18+, npm, and manually downloaded model weights.
 
 ```bash
 cd backend
 python -m venv .venv
-source .venv/bin/activate  # or .venv\Scripts\activate on Windows
-
+source .venv/bin/activate
 python -m pip install --upgrade pip setuptools wheel
 pip install -r requirements.txt
 ```
 
-**Model Weights**:
-1. Visit https://huggingface.co/Membrizard/ml_conformer_generator
-2. Accept the gated model access terms
-3. Download:
-   - `edm_moi_chembl_15_39.pt`
-   - `adj_mat_seer_chembl_15_39.pt`
-4. Place them in `backend/data/model_weights/`
+Download these gated files from `Membrizard/ml_conformer_generator` on Hugging Face and place them in `backend/data/model_weights/`:
 
-### Frontend Setup
+- `edm_moi_chembl_15_39.pt`
+- `adj_mat_seer_chembl_15_39.pt`
+
+Install the frontend separately:
 
 ```bash
 cd frontend
 npm install
+```
+
+## Run the real local application
+
+Start FastAPI, bound only to localhost:
+
+```bash
+cd backend
+.venv/bin/uvicorn api:app --app-dir src --host 127.0.0.1 --port 8000
+```
+
+In another terminal, start Vite:
+
+```bash
+cd frontend
 npm run dev
 ```
 
-Runs at http://localhost:5173
+Open `http://localhost:5173`. Vite proxies `/api/generate` to FastAPI's `POST /generate` route.
 
-## First Development Slice Tasks
+Example request:
 
-- [x] Create minimal repo structure
-- [ ] Python backend + requirements
-- [ ] `generate_demo.py` script (load, generate, serialize)
-- [ ] Serialization utilities (Mol → JSON)
-- [ ] React/Vite frontend setup
-- [ ] `MoleculeCard` component
-- [ ] 3D viewer placeholder
-- [ ] Generate realistic mock data
-- [ ] Document assumptions
+```bash
+curl -sS -X POST http://127.0.0.1:8000/generate \
+  -H 'Content-Type: application/json' \
+  --data '{"referenceMolPath":"Structure2D_CID_5353365.mol","nSamples":1,"variance":0}'
+```
 
-## Key Constraints & Decisions
+Blank `referenceMolPath` uses `DEMO_SMILES`. Request limits are `nSamples` 1–25 and `variance` 0–10; invalid values return HTTP 422.
 
-1. **Serialization**: MolBlock as primary geometry + coordinate arrays as derived debug/UI convenience data
-2. **Reference molecule**: Local `.mol` via `--reference-mol` / `-r` preferred; embedded `DEMO_SMILES` is smoke-test fallback only
-3. **Mock data**: Realistic—generated once from RDKit, committed to repo
-4. **No FastAPI yet**: Prove generator works first
-5. **3D coordinates preserved**: MolBlock format, not bare SMILES
-6. **Model weights excluded**: `.gitignore` entries, user must download
-7. **RDKit.js scope**: Optional frontend 2D SMILES-to-SVG depiction only; not generation, backend integration, or 3D geometry
-8. **Assumptions documented**: See `docs/ASSUMPTIONS.md`
+## Deterministic browser UAT
 
-## Performance Notes
+The fixture server replaces FastAPI on port 8000 during browser-state testing. Never run both simultaneously.
 
-- Model inference: ~11.5s for 50 conformers (H100 GPU)
-- Model size: ~190 MB total (both weights)
-- License: Weights are CC BY-NC-ND 4.0 (non-commercial use only)
+```bash
+cd frontend
+node uat/fixture-server.mjs
+```
 
-## Next Steps (Beyond Phase 1)
+It is non-production infrastructure built only with Node standard-library modules. See [docs/PHASE_2_UAT.md](docs/PHASE_2_UAT.md) for the complete two-lane checklist.
 
-- [ ] FastAPI wrapper (`/api/generate`)
-- [ ] Database (store generated molecules)
-- [ ] Job queue (async generation)
-- [ ] Optional `Molecule2DPreview` using RDKit.js/WebAssembly for SMILES-derived SVG card artwork
-- [ ] Real 3D rendering with 3Dmol.js
-- [ ] PubChem/ChEMBL lookup (read-only)
-- [ ] Docker setup
-- [ ] RL fine-tuning interface
+## Checks
 
-## License & Attribution
+```bash
+cd backend
+.venv/bin/pytest -q
+RUN_MODEL_TESTS=1 .venv/bin/pytest tests/test_e2e_generation.py -x
 
-- Project code license: TBD
-- Model weights: CC BY-NC-ND 4.0 (non-commercial use only)
-- Library: `mlconfgen` (Apache 2.0)
+cd ../frontend
+node uat/fixture-server.mjs --self-test
+npm run build
+```
+
+## Constraints and attribution
+
+- Model weights are manually downloaded and must not be committed.
+- Project code license: TBD.
+- Model weights: CC BY-NC-ND 4.0.
+- `mlconfgen`: Apache 2.0.
+- Architecture records: [docs/architecture/README.md](docs/architecture/README.md).

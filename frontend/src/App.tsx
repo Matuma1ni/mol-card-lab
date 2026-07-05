@@ -1,52 +1,101 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { generateConformers, GenerationApiError } from './api/generate'
+import GenerationForm from './components/GenerationForm'
 import MoleculeCard from './components/MoleculeCard'
-import { getMockConformerSet } from './data/mockMolecules'
-import { Conformer } from './types/molecule'
+import { ConformerSet, GenerateRequest } from './types/molecule'
 
 function App() {
-  const conformerSet = getMockConformerSet()
-  const conformers = conformerSet.conformers
-  const tabLabels = ['Benzene', 'Methane', 'Ethane', 'Benzene alt']
-  const [selectedConformerId, setSelectedConformerId] = useState<string>(conformers[0]?.id ?? '')
+  const [conformerSet, setConformerSet] = useState<ConformerSet | null>(null)
+  const [selectedConformerId, setSelectedConformerId] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [error, setError] = useState<string>()
+  const [warning, setWarning] = useState<string>()
+  const generatingRef = useRef(false)
 
-  const selectedConformer: Conformer | undefined = conformers.find(
-    (c) => c.id === selectedConformerId
-  ) || conformers[0]
+  const handleGenerate = async (request: GenerateRequest) => {
+    if (generatingRef.current) return
+    generatingRef.current = true
+    setIsGenerating(true)
+    setError(undefined)
+    setWarning(undefined)
+
+    try {
+      const result = await generateConformers(request)
+      if (result.conformers.length === 0) {
+        setError('No conformers were generated. Your previous results are still available.')
+        return
+      }
+
+      setConformerSet(result)
+      setSelectedConformerId(result.conformers[0].id)
+      const warnings = result.metadata?.warnings ?? []
+      if (warnings.length > 0) setWarning(warnings.join(' '))
+    } catch (caught) {
+      if (caught instanceof GenerationApiError) {
+        console.error('Conformer generation failed', {
+          status: caught.status,
+          technicalPayload: caught.technicalPayload,
+        })
+        setError(caught.message)
+      } else {
+        console.error('Conformer generation failed', caught)
+        setError('Conformer generation failed. Please try again.')
+      }
+    } finally {
+      generatingRef.current = false
+      setIsGenerating(false)
+    }
+  }
+
+  const conformers = conformerSet?.conformers ?? []
+  const selectedConformer = conformers.find(
+    (conformer) => conformer.id === selectedConformerId,
+  ) ?? conformers[0]
 
   return (
     <div className="app">
-      {/* Header */}
       <header className="app-header">
         <h1>mol-card-lab</h1>
+        <p>Generate collectible conformer cards from local molecular references.</p>
       </header>
 
       <main className="app-container">
-        <nav className="structure-nav" aria-label="Saved structures">
-          <h2>saved structures</h2>
-          <div className="structure-tabs">
-            {conformers.map((conformer, index) => (
-              <button
-                key={conformer.id}
-                className={`structure-tab ${
-                  conformer.id === selectedConformer?.id ? 'active' : ''
-                }`}
-                type="button"
-                onClick={() => setSelectedConformerId(conformer.id)}
-              >
-                {tabLabels[index] ?? `Structure ${index + 1}`}
-              </button>
-            ))}
-          </div>
-        </nav>
-
-        <section className="card-stage" aria-label="Selected molecule card">
-          {selectedConformer && (
-            <MoleculeCard
-              conformer={selectedConformer}
-              onSelect={setSelectedConformerId}
-            />
-          )}
+        <section className="generation-panel" aria-label="Generate conformers">
+          <GenerationForm
+            onGenerate={handleGenerate}
+            isGenerating={isGenerating}
+            error={error}
+            warning={warning}
+          />
         </section>
+
+        {conformerSet && selectedConformer ? (
+          <section className="results" aria-label="Generated conformers">
+            <nav className="conformer-selector" aria-label="Choose a conformer">
+              {conformers.map((conformer, index) => (
+                <button
+                  key={conformer.id}
+                  className={`conformer-option ${conformer.id === selectedConformer.id ? 'active' : ''}`}
+                  type="button"
+                  aria-current={conformer.id === selectedConformer.id ? 'true' : undefined}
+                  onClick={() => setSelectedConformerId(conformer.id)}
+                >
+                  <span>Conformer {index + 1}</span>
+                  <small>{conformer.smiles}</small>
+                </button>
+              ))}
+            </nav>
+
+            <div className="card-stage" aria-label="Selected molecule card">
+              <MoleculeCard conformer={selectedConformer} />
+            </div>
+          </section>
+        ) : (
+          <section className="empty-state" aria-live="polite">
+            <h2>No generated conformers yet</h2>
+            <p>Choose a local reference or use the demo fallback, then generate your first set.</p>
+          </section>
+        )}
       </main>
     </div>
   )

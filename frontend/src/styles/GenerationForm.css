@@ -1,0 +1,124 @@
+.generation-form {
+  display: grid;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  border: 1px solid #d9ddd3;
+  border-radius: var(--radius-md);
+  background: #ffffff;
+}
+
+.generation-field,
+.advanced-grid label {
+  display: grid;
+  gap: var(--spacing-xs);
+  color: #30362f;
+  font-weight: 600;
+}
+
+.path-input {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid #c9cfc2;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.path-input span {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-sm);
+  background: #eef1eb;
+  color: #667063;
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.path-input input,
+.advanced-grid input {
+  min-width: 0;
+  padding: var(--spacing-sm);
+  border: 1px solid #c9cfc2;
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  color: #20231f;
+}
+
+.path-input input {
+  flex: 1;
+  border: 0;
+  border-radius: 0;
+}
+
+.path-input:focus-within,
+.advanced-grid input:focus-visible,
+.generation-actions button:focus-visible,
+.advanced-options summary:focus-visible {
+  outline: 2px solid #557c62;
+  outline-offset: 2px;
+}
+
+.field-hint,
+.generation-status,
+.generation-message {
+  margin: 0;
+  color: #667063;
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+.advanced-options summary {
+  cursor: pointer;
+  color: #30362f;
+  font-weight: 700;
+}
+
+.advanced-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-md);
+}
+
+.generation-message.error {
+  color: #9c2f2f;
+}
+
+.generation-message.warning {
+  color: #745817;
+}
+
+.generation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.generation-actions button {
+  min-height: 42px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid #557c62;
+  border-radius: var(--radius-sm);
+  background: #557c62;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.generation-actions button.secondary {
+  background: #ffffff;
+  color: #35523d;
+}
+
+.generation-actions button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+@media (max-width: 720px) {
+  .path-input {
+    display: grid;
+  }
+
+  .path-input span {
+    min-height: 36px;
+  }
+}

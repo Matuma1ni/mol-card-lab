@@ -5,20 +5,16 @@ import '../styles/MoleculeCard.css'
 
 export const MoleculeCard: React.FC<MoleculeCardProps> = ({
   conformer,
-  onSelect
 }) => {
+  const referenceSource = conformer.metadata?.reference_source
+  const referenceLabel = referenceSource === 'mol_file'
+    ? 'Local .mol file'
+    : referenceSource === 'demo_smiles'
+      ? 'DEMO_SMILES fallback'
+      : 'Unknown'
+
   return (
-    <div
-      className="molecule-card"
-      onClick={() => onSelect?.(conformer.id)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          onSelect?.(conformer.id)
-        }
-      }}
-    >
+    <article className="molecule-card">
       <div className="card-preview">
         <MoleculeViewer3D
           molBlock={conformer.molBlock}
@@ -27,10 +23,22 @@ export const MoleculeCard: React.FC<MoleculeCardProps> = ({
       </div>
 
       <div className="card-footer">
-        <div className="card-label">SMILES</div>
-        <div className="card-smiles">{conformer.smiles}</div>
+        <dl className="card-metadata">
+          <div>
+            <dt>SMILES</dt>
+            <dd className="card-smiles">{conformer.smiles}</dd>
+          </div>
+          <div>
+            <dt>Atom count</dt>
+            <dd>{conformer.num_atoms}</dd>
+          </div>
+          <div>
+            <dt>Reference source</dt>
+            <dd>{referenceLabel}</dd>
+          </div>
+        </dl>
       </div>
-    </div>
+    </article>
   )
 }
 

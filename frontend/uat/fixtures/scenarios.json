@@ -1,0 +1,51 @@
+{
+  "success": {
+    "status": 200,
+    "delayMs": 0,
+    "body": {
+      "conformers": [
+        {"id":"success-1","smiles":"C","molBlock":"success-1\n  UAT 3D\nM  END","coordinates":[[0,0,0]],"num_atoms":1,"metadata":{"reference_source":"demo_smiles","reference_3d_geometry":"embedded"}},
+        {"id":"success-2","smiles":"CC","molBlock":"success-2\n  UAT 3D\nM  END","coordinates":[[0,0,0],[1,0,0]],"num_atoms":2,"metadata":{"reference_source":"demo_smiles","reference_3d_geometry":"embedded"}},
+        {"id":"success-3","smiles":"CCC","molBlock":"success-3\n  UAT 3D\nM  END","coordinates":[[0,0,0]],"num_atoms":3,"metadata":{"reference_source":"demo_smiles","reference_3d_geometry":"embedded"}},
+        {"id":"success-4","smiles":"CCCC","molBlock":"success-4\n  UAT 3D\nM  END","coordinates":[[0,0,0]],"num_atoms":4,"metadata":{"reference_source":"demo_smiles","reference_3d_geometry":"embedded"}},
+        {"id":"success-5","smiles":"CCO","molBlock":"success-5\n  UAT 3D\nM  END","coordinates":[[0,0,0]],"num_atoms":3,"metadata":{"reference_source":"demo_smiles","reference_3d_geometry":"embedded"}},
+        {"id":"success-6","smiles":"CCN","molBlock":"success-6\n  UAT 3D\nM  END","coordinates":[[0,0,0]],"num_atoms":3,"metadata":{"reference_source":"demo_smiles","reference_3d_geometry":"embedded"}},
+        {"id":"success-7","smiles":"c1ccccc1","molBlock":"success-7\n  UAT 3D\nM  END","coordinates":[[0,0,0]],"num_atoms":6,"metadata":{"reference_source":"demo_smiles","reference_3d_geometry":"embedded"}},
+        {"id":"success-8","smiles":"CC(=O)O","molBlock":"success-8\n  UAT 3D\nM  END","coordinates":[[0,0,0]],"num_atoms":4,"metadata":{"reference_source":"demo_smiles","reference_3d_geometry":"embedded"}}
+      ],
+      "count": 8,
+      "metadata": {"reference_source":"demo_smiles","reference_3d_geometry":"embedded","num_requested":8,"num_generated":8,"num_failed":0,"warnings":[],"warning_count":0}
+    }
+  },
+  "slow-success": {
+    "status": 200,
+    "delayMs": 1800,
+    "body": {
+      "conformers": [{"id":"slow-1","smiles":"CO","molBlock":"slow-1\n  UAT 3D\nM  END","coordinates":[[0,0,0]],"num_atoms":2,"metadata":{"reference_source":"demo_smiles","reference_3d_geometry":"embedded"}}],
+      "count": 1,
+      "metadata": {"reference_source":"demo_smiles","reference_3d_geometry":"embedded","num_requested":1,"num_generated":1,"num_failed":0,"warnings":[],"warning_count":0}
+    }
+  },
+  "partial": {
+    "status": 200,
+    "delayMs": 0,
+    "body": {
+      "conformers": [
+        {"id":"partial-1","smiles":"CN","molBlock":"partial-1\n  UAT 3D\nM  END","coordinates":[[0,0,0]],"num_atoms":2,"metadata":{"reference_source":"mol_file","reference_3d_geometry":"provided","reference_path":"uat/reference.mol"}},
+        {"id":"partial-2","smiles":"CNC","molBlock":"partial-2\n  UAT 3D\nM  END","coordinates":[[0,0,0]],"num_atoms":3,"metadata":{"reference_source":"mol_file","reference_3d_geometry":"provided","reference_path":"uat/reference.mol"}}
+      ],
+      "count": 2,
+      "metadata": {"reference_source":"mol_file","reference_3d_geometry":"provided","reference_path":"uat/reference.mol","num_requested":4,"num_generated":2,"num_failed":2,"warnings":["2 of 4 requested conformers could not be generated"],"warning_count":1}
+    }
+  },
+  "empty": {
+    "status": 200,
+    "delayMs": 0,
+    "body": {"conformers":[],"count":0,"metadata":{"reference_source":"demo_smiles","reference_3d_geometry":"embedded","num_requested":2,"num_generated":0,"num_failed":2,"warnings":["No conformers generated"],"warning_count":1}}
+  },
+  "error": {
+    "status": 500,
+    "delayMs": 0,
+    "body": {"detail":"Fixture generation failure","diagnostic":"UAT_ERROR_ONLY"}
+  }
+}

@@ -15,6 +15,14 @@
   height: 100%;
 }
 
+.viewer-placeholder.loaded {
+  background: radial-gradient(circle at center, #f8faf6, #e8eee4);
+}
+
+.viewer-placeholder.missing {
+  background: #f4eaea;
+}
+
 .placeholder-content {
   display: flex;
   flex-direction: column;

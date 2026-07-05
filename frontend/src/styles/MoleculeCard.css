@@ -8,19 +8,6 @@
   border-radius: 16px;
   background: #cad4c3;
   box-shadow: 0 10px 30px rgba(32, 35, 31, 0.08);
-  cursor: pointer;
-  user-select: none;
-}
-
-.molecule-card:hover {
-  transform: none;
-  border-color: #557c62;
-  box-shadow: 0 14px 34px rgba(32, 35, 31, 0.12);
-}
-
-.molecule-card:focus-visible {
-  outline: 2px solid #557c62;
-  outline-offset: 3px;
 }
 
 .card-preview {
@@ -53,12 +40,30 @@
   overflow: hidden;
 }
 
-.card-label {
+.card-metadata {
+  display: grid;
+  gap: var(--spacing-sm);
+}
+
+.card-metadata > div {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.6fr) minmax(0, 1.4fr);
+  gap: var(--spacing-sm);
+  align-items: baseline;
+}
+
+.card-metadata dt {
   color: #667063;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  text-align: center;
+}
+
+.card-metadata dd {
+  margin: 0;
+  color: #20231f;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
 }
 
 .card-smiles {
@@ -68,7 +73,5 @@
   font-family: var(--font-mono);
   font-size: 0.95rem;
   line-height: 1.4;
-  text-align: center;
   overflow-wrap: anywhere;
-  overflow: auto;
 }
