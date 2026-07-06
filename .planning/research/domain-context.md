@@ -11,7 +11,8 @@ This project is a prototype exploring machine-learned 3D molecular conformer gen
 - The weights are licensed under CC BY-NC-ND 4.0, which restricts commercial use.
 - Generated molecules should be treated as exploratory artifacts, not validated by PubChem/ChEMBL membership.
 - 3D structure preservation is essential for the frontend visualization.
-- RDKit.js/WebAssembly can support frontend 2D depiction from SMILES, but only as card artwork and not as conformer generation or geometry preservation.
+- A browser-side chemistry depiction library can support Phase 2 SMILES-to-2D artwork; that depiction is not conformer generation or geometry preservation.
+- A frontend-compatible WASM conformer generator is being developed separately and will be integrated only after its interface is available.
 
 ## Relevant constraints
 
@@ -19,12 +20,12 @@ This project is a prototype exploring machine-learned 3D molecular conformer gen
 - Keep model weights out of source control.
 - Prioritize a small, disposable spike that can be refactored.
 - Do not add full production APIs, database, or authentication in the first phase.
-- Do not replace the Python `ml_conformer_generator` runtime path with browser-side ONNX, browser-side inference, or RDKit.js.
+- Preserve the completed Python spike as the proven Phase 1 path; do not build an interim API while waiting for the frontend-compatible WASM generator.
 
 ## Future research directions
 
-- 3Dmol.js viewer compatibility with MolBlock/SDF output
-- Optional `Molecule2DPreview` using RDKit.js/WebAssembly for SMILES-derived SVG card artwork
+- RDKit.js bundle behavior, SVG rendering, and failure handling for Phase 2
+- Frontend generator-adapter design and generated geometry contract for Phase 3
+- Lightweight 3D viewer compatibility with actual generated geometry for Phase 4
 - Best practice for storing generated conformers in frontend-friendly JSON
-- Lightweight backend API design for future integration
 - PubChem/ChEMBL lookup as enrichment, not validation

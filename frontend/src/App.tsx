@@ -3,11 +3,29 @@ import MoleculeCard from './components/MoleculeCard'
 import { getMockConformerSet } from './data/mockMolecules'
 import { Conformer } from './types/molecule'
 
+function randomInitialId(conformerIds: string[]): string {
+  if (conformerIds.length === 0) return ''
+  return conformerIds[Math.floor(Math.random() * conformerIds.length)]
+}
+
+export function pickDifferentId(conformerIds: string[], currentId: string): string {
+  if (conformerIds.length < 2) return conformerIds[0] ?? ''
+
+  const currentIndex = conformerIds.indexOf(currentId)
+  if (currentIndex < 0) return randomInitialId(conformerIds)
+
+  const otherIndex = Math.floor(Math.random() * (conformerIds.length - 1))
+  return conformerIds[otherIndex >= currentIndex ? otherIndex + 1 : otherIndex]
+}
+
 function App() {
   const conformerSet = getMockConformerSet()
   const conformers = conformerSet.conformers
-  const tabLabels = ['Benzene', 'Methane', 'Ethane', 'Benzene alt']
-  const [selectedConformerId, setSelectedConformerId] = useState<string>(conformers[0]?.id ?? '')
+  const conformerIds = conformers.map((conformer) => conformer.id)
+  const [selectedConformerId, setSelectedConformerId] = useState(() =>
+    randomInitialId(conformerIds),
+  )
+  const [previewPending, setPreviewPending] = useState(true)
 
   const selectedConformer: Conformer | undefined = conformers.find(
     (c) => c.id === selectedConformerId
@@ -21,30 +39,27 @@ function App() {
       </header>
 
       <main className="app-container">
-        <nav className="structure-nav" aria-label="Saved structures">
-          <h2>saved structures</h2>
-          <div className="structure-tabs">
-            {conformers.map((conformer, index) => (
-              <button
-                key={conformer.id}
-                className={`structure-tab ${
-                  conformer.id === selectedConformer?.id ? 'active' : ''
-                }`}
-                type="button"
-                onClick={() => setSelectedConformerId(conformer.id)}
-              >
-                {tabLabels[index] ?? `Structure ${index + 1}`}
-              </button>
-            ))}
-          </div>
-        </nav>
-
         <section className="card-stage" aria-label="Selected molecule card">
           {selectedConformer && (
-            <MoleculeCard
-              conformer={selectedConformer}
-              onSelect={setSelectedConformerId}
-            />
+            <>
+              <MoleculeCard
+                conformer={selectedConformer}
+                onLoadingChange={setPreviewPending}
+              />
+              <button
+                className="pick-another-button"
+                type="button"
+                disabled={previewPending}
+                onClick={() => {
+                  setPreviewPending(true)
+                  setSelectedConformerId((currentId) =>
+                    pickDifferentId(conformerIds, currentId),
+                  )
+                }}
+              >
+                Pick another
+              </button>
+            </>
           )}
         </section>
       </main>

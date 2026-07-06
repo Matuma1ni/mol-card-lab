@@ -15,7 +15,7 @@ Completed the initial scaffold for a molecular conformer generation + visualizat
 - **React Frontend**: Card-based UI for browsing generated 3D molecular conformers
 - **Clean Separation**: Backend generates data, frontend consumes mock/real data as JSON
 
-Clarified frontend rendering scope: RDKit.js/WebAssembly is only a possible frontend 2D depiction helper for SMILES-derived SVG card artwork. It does not replace Python generation, browser-side ONNX remains out of scope for Phase 1, and generated 3D geometry must continue to be preserved as MolBlock.
+Phase 1 is complete. The follow-on direction is frontend-first: Phase 2 adds RDKit.js SVG depiction from 10 fixed local SMILES examples, Phase 3 integrates the frontend-compatible WASM generator, and Phase 4 visualizes actual generated conformers after their geometry format is known.
 
 ---
 
@@ -202,10 +202,10 @@ Placeholder for future 3D rendering.
 - Molecule icon animation
 - SMILES + MolBlock display
 
-Future work can integrate 3Dmol.js after Phase 1.
+Phase 4 will select a 3D viewer after Phase 3 establishes the actual generated geometry format.
 
-#### Optional `Molecule2DPreview`
-Future Phase 1.5 or later work may add a frontend-only RDKit.js/WebAssembly preview that renders a 2D SVG from SMILES for card artwork. This preview is not required for Phase 1, is not the generator, and does not preserve generated 3D conformer coordinates.
+#### Planned `Molecule2DPreview`
+Phase 2 will add a frontend-only RDKit.js preview that parses SMILES and renders SVG card artwork. This preview was not required for Phase 1, is not the generator, and does not preserve generated 3D conformer coordinates.
 
 #### `App.tsx`
 Main layout:
@@ -260,22 +260,23 @@ vite@^4.4.0
 3. **Test card grid** with mock data (already loaded)
 4. Keep `MoleculeViewer3D.tsx` as a placeholder during Phase 1
 
-### Optional Phase 1.5
-- [ ] Add `Molecule2DPreview` with RDKit.js/WebAssembly for SMILES-derived SVG card artwork
-- [ ] Keep MolBlock as the source of generated 3D geometry
-- [ ] Avoid treating RDKit.js as the backend connector or generation runtime
+### Phase 2: 2D SMILES visualization
+- [ ] Expand the local fixture to exactly 10 labeled molecule examples
+- [ ] Add real 2D depiction from SMILES with graceful failure fallback
+- [ ] Show one selected card with simple cycling/random selection
+- [ ] Keep the phase frontend-only and reuse the current card flow
 
-### Before Later API Work
-1. Confirm backend generation works on local machine
-2. Confirm frontend renders mock data without errors
-3. Confirm serialized JSON includes MolBlock and reference metadata
+### Phase 3: frontend WASM generation integration
+- [ ] Wait for the frontend-compatible generator interface
+- [ ] Add a frontend generator adapter
+- [ ] Map output to the existing molecule-card contract where practical
 
-### Medium-term
-- [ ] FastAPI wrapper (`/api/generate`)
-- [ ] User-facing molecule input beyond local `.mol` files
-- [ ] Database to store generated results
-- [ ] Job queue for long-running generations
-- [ ] PubChem/ChEMBL lookup as optional identity enrichment
+### Phase 4: 3D visualization of generated conformers
+- [ ] Select a viewer after Phase 3 confirms the geometry format
+- [ ] Render actual generated conformers, not temporary hand-written examples
+- [ ] Handle loading, invalid/missing geometry, and missing WebGL gracefully
+
+API work is deferred because the preferred target architecture is browser-side generation via WebAssembly. This keeps the prototype aligned with a frontend-first deployment model and avoids a backend boundary that may not be needed for generation.
 
 ---
 
@@ -290,7 +291,7 @@ vite@^4.4.0
 | **Mock data (not generated per request)** | Frontend dev independent of backend | Mock data must stay in sync (script to regenerate) |
 | **RDKit.js only for 2D preview** | Improves collectible card artwork from SMILES | Could be confused with geometry unless clearly documented |
 | **Singleton generator** | Expensive to load; reuse in same process | Requires careful memory management in multi-worker scenario |
-| **No FastAPI yet** | Prove spike works first; then add API layer | Tight coupling during spike (intentional) |
+| **API paused** | Prefer direct browser-side WASM integration when the updated generator is available | WASM contract is pending; isolate it behind an adapter |
 
 ---
 
@@ -301,7 +302,7 @@ See [`docs/ASSUMPTIONS.md`](docs/ASSUMPTIONS.md) for detailed list including:
 - ✅ Reference molecule source (`.mol` preferred, `DEMO_SMILES` fallback)
 - ✅ Model weights handling (manual download)
 - ✅ Mock data strategy (offline generation)
-- ✅ RDKit.js scope (optional frontend-only 2D depiction)
+- ✅ 2D depiction scope (Phase 2 frontend-only artwork from SMILES)
 - ✅ Chemical validity vs. database existence
 - ✅ 3D coordinate preservation (MolBlock is source of truth)
 - ⚠️ Unknowns: optimal conformer count, uniqueness metrics, state management
@@ -387,7 +388,7 @@ npm run dev
 |------|-----------|
 | Model weights not available | Clear README + HF link + setup script |
 | Future viewer incompatible with MolBlock format | Add a conversion helper after Phase 1 if needed |
-| RDKit.js SVG mistaken for generated geometry | Keep RDKit.js scoped to optional 2D card artwork and preserve MolBlock |
+| 2D depiction mistaken for generated geometry | Keep SMILES depiction scoped to Phase 2 card artwork and preserve MolBlock |
 | GPU not available for inference | Script detects CPU fallback (slower but functional) |
 | Frontend mock data out of sync with backend | Script to regenerate mock data when needed |
 | RDKit install complexity | Recommend conda; document troubleshooting |

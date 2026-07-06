@@ -11,7 +11,7 @@
 
 **Rationale**: MolBlock preserves 3D geometry for visualization; raw coordinates enable analysis.
 
-**Risk**: Future 3Dmol.js integration may need format handling. Mitigated by keeping MolBlock as the preserved geometry representation.
+**Risk**: The Phase 4 viewer may need format handling. Mitigated by preserving authoritative generated geometry and choosing the viewer only after Phase 3 confirms its format.
 
 ---
 
@@ -38,31 +38,33 @@
 ---
 
 ### 4. Mock Data Source
-**Assumption**: Generate realistic mock molecules once (offline) using RDKit, commit to frontend codebase.
+**Assumption**: Phase 2 uses a fixed local set of exactly 10 predefined molecule examples, committed to the frontend codebase.
 
 **Rationale**: Frontend dev doesn't require running Python/model. Realistic UI testing.
 
-**Risk**: Mock data gets stale if model changes. Mitigation: Script to regenerate mock data on demand.
+**Risk**: Mock data gets stale if the eventual WASM output changes. Mitigation: Keep the examples behind the existing molecule-card shape and adapt at the later integration boundary.
 
 ---
 
 ### 5. Frontend 2D Depiction
-**Assumption**: RDKit.js/WebAssembly may be used in the React frontend to render a 2D SVG depiction from a SMILES string.
+**Assumption**: RDKit.js will be used in Phase 2 to parse SMILES in the browser and render an SVG depiction.
 
 **Scope**: This is only for collectible card preview/artwork, such as a future `Molecule2DPreview` component.
 
 **Non-goal**: RDKit.js is not the generator, backend connector, or source of 3D geometry. It must not replace Python `ml_conformer_generator` integration, browser-side ONNX must remain out of Phase 1, and SMILES-derived SVG must not be treated as preserving generated conformer coordinates.
 
-**Timing**: Optional Phase 1.5 or later enhancement. It is not required for Phase 1 success while the current placeholder 3D viewer remains.
+**Implementation boundary**: RDKit.js initialization and any required `dangerouslySetInnerHTML` usage remain isolated in one small component/helper, with loading and invalid-SMILES fallbacks.
+
+**Timing**: Phase 2 deliverable. It was not required for the completed Phase 1.
 
 ---
 
-### 6. No FastAPI in Spike
-**Assumption**: `generate_demo.py` is a standalone script; no HTTP API yet.
+### 6. API Work Paused
+**Assumption**: `generate_demo.py` remains the completed standalone Phase 1 path. Phase 2 adds RDKit.js depiction, Phase 3 adds browser-side generation, and Phase 4 adds generated-conformer 3D visualization without an HTTP API.
 
-**Rationale**: Prove generator works locally first. API adds complexity.
+**Rationale**: The conformer generator  is being updated for frontend WebAssembly use, so a browser-side adapter is the preferred future integration path.
 
-**Risk**: Eventually need to decouple Python script from frontend. Mitigation: Serialization + output structure designed for API migration.
+**Risk**: The delivered WASM interface may differ from current expectations. Mitigation: wait for the concrete interface and isolate it behind a frontend generator adapter.
 
 ---
 
@@ -88,11 +90,11 @@
 
 - [ ] What is the optimal variance/sampling strategy for demo? (Use library defaults for now)
 - [ ] How many conformers are "enough" for a good UX? (Start with 5–10 for speed)
-- [ ] Should each card show one conformer or all N conformers? (Start with one, add carousel later)
+- [ ] Should Phase 2 use only next/previous controls, only random selection, or both? (Prefer the smallest interaction that fits the existing UI.)
 - [ ] How to handle molecule uniqueness? (Coordinate-based vs. SMILES-based deduplication)
-- [ ] Will future 3Dmol.js integration accept raw MolBlock strings or need format conversion?
-- [ ] Should a future `Molecule2DPreview` use RDKit.js-generated SVG, and how should it coexist with the placeholder/future 3D viewer?
-- [ ] Should backend expose query/filtering endpoints? (Not in spike; data-driven later)
+- [ ] What geometry format will Phase 3 expose, and will the Phase 4 viewer need conversion?
+- [ ] What exact input/output contract will the frontend-compatible WASM generator expose?
+- [ ] Which lightweight 3D viewer best fits the confirmed generated geometry format? (Evaluate Speck only in Phase 4.)
 - [ ] How to structure state management in React for large conformer sets?
 
 ---
@@ -102,7 +104,7 @@
 1. **GPU not available**: Script should detect and warn, but fall back to CPU (slower).
 2. **Model weight download fails**: Clear error message + manual instructions.
 3. **RDKit installation issues**: Conda recommended for complex dependencies.
-4. **Future 3Dmol.js integration**: Placeholder viewer may need format-specific handling later.
+4. **Future 3D viewer integration**: Placeholder viewer may need format-specific handling after Phase 3.
 5. **Serialization format wrong for future viewer**: Need format conversion helper later if MolBlock is not accepted directly.
 6. **2D SVG confused with geometry**: Document that RDKit.js SMILES-to-SVG is card artwork only and does not preserve generated 3D conformer coordinates.
 

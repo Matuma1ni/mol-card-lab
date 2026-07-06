@@ -13,7 +13,7 @@ The current spike is intentionally narrow:
 - The backend proves that a standalone Python flow can generate 3D conformers from a reference molecule.
 - The frontend remains mock-driven and uses placeholder 3D rendering.
 - Geometry is preserved as MolBlock/SDF, while coordinate arrays are retained as derived convenience data.
-- RDKit.js/WebAssembly is only a possible frontend 2D depiction helper for SMILES-derived SVG card artwork.
+- RDKit.js is the planned Phase 2 frontend helper for SMILES-derived SVG card artwork.
 - Model weights are expected to be downloaded manually by the user and placed under backend/data/model_weights/.
 
 ## Key Architectural Decisions
@@ -30,8 +30,8 @@ The current spike is intentionally narrow:
    - Avoid production API wiring, database persistence, and queueing in Phase 1.
 
 4. Frontend depiction
-   - A future `Molecule2DPreview` may use RDKit.js/WebAssembly to render SMILES as SVG.
-   - That SVG is not generated conformer geometry and does not replace MolBlock or future 3Dmol.js rendering.
+   - Phase 2 will isolate RDKit.js behind a small component/helper that renders SMILES as SVG.
+   - That SVG is not generated conformer geometry and does not replace the authoritative Phase 3 geometry or Phase 4 3D rendering.
 
 ## Inconsistencies Observed During Review
 

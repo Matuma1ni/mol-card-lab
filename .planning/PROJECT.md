@@ -2,21 +2,25 @@
 
 ## Project Overview
 
-`mol-card-lab` is an exploratory prototype for generating and visualizing 3D molecular conformers as collectible card-style assets. The initial work is intentionally narrow: validate the Python `ml_conformer_generator` library locally, preserve 3D conformer coordinates in serialization, and build a minimal React/Vite UI with mock molecule data.
+`mol-card-lab` is an exploratory prototype for generating and visualizing molecular structures as collectible card-style assets. Phase 1 validated the Python `ml_conformer_generator` path, preserved 3D conformer coordinates in serialization, and established a React/Vite UI with mock molecule data. Current work is frontend-first: Phase 2 adds RDKit.js 2D depiction from SMILES, Phase 3 integrates the browser-compatible WASM generator, and Phase 4 visualizes actual generated conformers in 3D.
 
 ## Mission
 
-Create a clean, maintainable spike that proves the core data flow:
+Create a clean, maintainable prototype that preserves the proven Phase 1 data contract while improving browser-side visualization:
 - reference molecule -> `mlconfgen` conformer generation -> 3D-aware serialization
 - mocked frontend experience using realistic molecule data
+- SMILES -> RDKit.js SVG card depiction in Phase 2
+- frontend generator adapter -> WASM generation in Phase 3
+- generated geometry -> 3D viewer in Phase 4
 
 ## Project Goals
 
 - Validate `mlconfgen` locally with downloadable weights
 - Preserve 3D geometry in output using MolBlock/SDF format
 - Keep the first slice simple and disposable
-- Avoid building FastAPI, auth, database, job queue, or browser-side ONNX in this phase
-- Treat RDKit.js/WebAssembly as optional frontend-only 2D depiction, not generation or 3D geometry
+- Keep Phases 2–4 frontend-first and independent of an API
+- Treat a 2D depiction library as artwork, not generated 3D geometry
+- Defer generator integration until the frontend-compatible WASM library is available
 - Avoid treating PubChem/ChEMBL lookup as chemical validation
 
 ## Audience
@@ -29,7 +33,7 @@ Create a clean, maintainable spike that proves the core data flow:
 - Production API or deployment infrastructure
 - Full chemical database integration
 - Auth, user accounts, billing, or workflow orchestration
-- Browser-side conformer generation
+- Browser-side conformer generation before the WASM library is available
 - RDKit.js as a backend connector, generator, or source of generated 3D conformer geometry
 - RL fine-tuning or model training
 
@@ -40,4 +44,4 @@ Create a clean, maintainable spike that proves the core data flow:
 - Frontend renders a card-based UI with realistic mock molecule data
 - Project planning artifacts exist in `.planning/`
 
-RDKit.js/WebAssembly can be planned as a Phase 1.5 or later `Molecule2DPreview` for SMILES-derived SVG card artwork. It does not change Phase 1 success criteria.
+API work is deferred because the preferred target architecture is browser-side generation via WebAssembly. This keeps the prototype aligned with a frontend-first deployment model and avoids introducing a backend boundary that may not be needed for generation. Phases 2–4 do not require or plan an interim backend API.

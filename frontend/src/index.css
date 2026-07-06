@@ -1,6 +1,6 @@
 @import './styles/App.css';
 @import './styles/MoleculeCard.css';
-@import './styles/MoleculeViewer3D.css';
+@import './styles/Molecule2DPreview.css';
 
 :root {
   --color-primary: #3b82f6;

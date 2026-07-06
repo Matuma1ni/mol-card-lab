@@ -1,154 +1,48 @@
 /**
- * Mock molecule data for frontend development.
+ * Fixed local molecule examples for the frontend prototype.
  *
- * ASSUMPTION: These are realistic molecules generated once from RDKit.
- * Structure: {id, smiles, molBlock, coordinates}
- *
- * For now, it's hardcoded for Phase 1 UI development without running Python.
+ * Phase 2 uses SMILES for 2D depiction. Empty geometry fields deliberately
+ * preserve the Phase 1 conformer-shaped card contract without presenting
+ * fixture data as generated 3D geometry.
  */
 
-import { Conformer } from '../types/molecule'
+import { Conformer, ConformerSet } from '../types/molecule'
 
-// Simple benzene conformer (realistic MolBlock + coordinates)
-const BENZENE_CONFORMER: Conformer = {
-  id: 'mock_benzene_1',
-  smiles: 'c1ccccc1',
-  molBlock: `
-     RDKit          3D
-
-  6  6  0  0  0  0  0  0  0  0999 V2000
-    1.2124    0.6996    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.6062    1.2124    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -0.6062    1.2124    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -1.2124    0.6996    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -0.6062   -0.6996    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.6062   -0.6996    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-  1  2  2  0
-  2  3  1  0
-  3  4  2  0
-  4  5  1  0
-  5  6  2  0
-  6  1  1  0
-M  END
-`,
-  coordinates: [
-    [1.2124, 0.6996, 0.0],
-    [0.6062, 1.2124, 0.0],
-    [-0.6062, 1.2124, 0.0],
-    [-1.2124, 0.6996, 0.0],
-    [-0.6062, -0.6996, 0.0],
-    [0.6062, -0.6996, 0.0],
-  ],
-  num_atoms: 6,
-  metadata: {
-    source: 'mock',
-    generated_at: '2024-01-01T00:00:00Z',
-  },
+function localMolecule(id: string, name: string, smiles: string): Conformer {
+  return {
+    id,
+    name,
+    smiles,
+    molBlock: '',
+    coordinates: [],
+    num_atoms: 0,
+    metadata: {
+      source: 'phase_2_local_catalog',
+      geometry: 'not_provided',
+    },
+  }
 }
 
-// Methane conformer
-const METHANE_CONFORMER: Conformer = {
-  id: 'mock_methane_1',
-  smiles: 'C',
-  molBlock: `
-     RDKit          3D
-
-  1  0  0  0  0  0  0  0  0  0999 V2000
-    0.0000    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-M  END
-`,
-  coordinates: [
-    [0.0, 0.0, 0.0],
-  ],
-  num_atoms: 1,
-  metadata: {
-    source: 'mock',
-    generated_at: '2024-01-01T00:00:00Z',
-  },
-}
-
-// Ethane conformer
-const ETHANE_CONFORMER: Conformer = {
-  id: 'mock_ethane_1',
-  smiles: 'CC',
-  molBlock: `
-     RDKit          3D
-
-  2  1  0  0  0  0  0  0  0  0999 V2000
-   -0.7590    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.7590    0.0000    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0
-  1  2  1  0
-M  END
-`,
-  coordinates: [
-    [-0.759, 0.0, 0.0],
-    [0.759, 0.0, 0.0],
-  ],
-  num_atoms: 2,
-  metadata: {
-    source: 'mock',
-    generated_at: '2024-01-01T00:00:00Z',
-  },
-}
-
-// Benzene with different conformer
-const BENZENE_CONFORMER_2: Conformer = {
-  id: 'mock_benzene_2',
-  smiles: 'c1ccccc1',
-  molBlock: `
-     RDKit          3D
-
-  6  6  0  0  0  0  0  0  0  0999 V2000
-    1.2124    0.6996    0.1000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.6062    1.2124    0.1000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -0.6062    1.2124    0.1000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -1.2124    0.6996    0.1000 C   0  0  0  0  0  0  0  0  0  0  0  0
-   -0.6062   -0.6996    0.1000 C   0  0  0  0  0  0  0  0  0  0  0  0
-    0.6062   -0.6996    0.1000 C   0  0  0  0  0  0  0  0  0  0  0  0
-  1  2  2  0
-  2  3  1  0
-  3  4  2  0
-  4  5  1  0
-  5  6  2  0
-  6  1  1  0
-M  END
-`,
-  coordinates: [
-    [1.2124, 0.6996, 0.1],
-    [0.6062, 1.2124, 0.1],
-    [-0.6062, 1.2124, 0.1],
-    [-1.2124, 0.6996, 0.1],
-    [-0.6062, -0.6996, 0.1],
-    [0.6062, -0.6996, 0.1],
-  ],
-  num_atoms: 6,
-  metadata: {
-    source: 'mock',
-    generated_at: '2024-01-01T00:00:00Z',
-  },
-}
-
-/**
- * Mock dataset of conformers.
- * Used for UI development without running the Python backend.
- */
 export const MOCK_CONFORMERS: Conformer[] = [
-  BENZENE_CONFORMER,
-  METHANE_CONFORMER,
-  ETHANE_CONFORMER,
-  BENZENE_CONFORMER_2,
+  localMolecule('aspirin', 'Aspirin', 'CC(=O)Oc1ccccc1C(=O)O'),
+  localMolecule('caffeine', 'Caffeine', 'CN1C(=O)N(C)c2ncn(C)c2C1=O'),
+  localMolecule('acetaminophen', 'Acetaminophen', 'CC(=O)NC1=CC=C(C=C1)O'),
+  localMolecule('ibuprofen', 'Ibuprofen', 'CC(C)Cc1ccc(cc1)[C@@H](C)C(=O)O'),
+  localMolecule('naproxen', 'Naproxen', 'COc1ccc2cc([C@@H](C)C(=O)O)ccc2c1'),
+  localMolecule('lidocaine', 'Lidocaine', 'CCN(CC)C(=O)c1c(C)cccc1C'),
+  localMolecule('nicotine', 'Nicotine', 'CN1CCC[C@H]1c2cccnc2'),
+  localMolecule('fluoxetine', 'Fluoxetine', 'CNCCC(c1ccccc1)Oc2ccc(cc2)C(F)(F)F'),
+  localMolecule('diazepam', 'Diazepam', 'CN1C(=O)CN=C(c2ccccc2)c3cc(Cl)ccc13'),
+  localMolecule('warfarin', 'Warfarin', 'CC(=O)C(c1ccccc1)c2c(O)oc3ccccc3c2=O'),
 ]
 
-/**
- * Load mock data as a complete ConformerSet.
- */
-export function getMockConformerSet() {
+export function getMockConformerSet(): ConformerSet {
   return {
     conformers: MOCK_CONFORMERS,
     count: MOCK_CONFORMERS.length,
     metadata: {
-      source: 'mock_data',
-      note: 'For Phase 1 UI development only.',
+      source: 'phase_2_local_catalog',
+      note: 'Fixed local examples for frontend depiction only.',
     },
   }
 }
