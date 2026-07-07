@@ -10,6 +10,7 @@ export interface Coordinates {
 
 export interface Conformer {
   id: string
+  name: string
   smiles: string
   molBlock: string
   coordinates: [number, number, number][]
@@ -28,7 +29,7 @@ export type ConformerID = string
 
 export interface MoleculeCardProps {
   conformer: Conformer
-  onSelect?: (id: ConformerID) => void
+  onLoadingChange?: (loading: boolean) => void
 }
 
 export interface MoleculeViewer3DProps {

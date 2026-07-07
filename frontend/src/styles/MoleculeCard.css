@@ -8,8 +8,6 @@
   border-radius: 16px;
   background: #cad4c3;
   box-shadow: 0 10px 30px rgba(32, 35, 31, 0.08);
-  cursor: pointer;
-  user-select: none;
 }
 
 .molecule-card:hover {
@@ -18,9 +16,14 @@
   box-shadow: 0 14px 34px rgba(32, 35, 31, 0.12);
 }
 
-.molecule-card:focus-visible {
-  outline: 2px solid #557c62;
-  outline-offset: 3px;
+.card-title {
+  flex: 0 0 auto;
+  margin: 0 0 var(--spacing-sm);
+  padding: 0 var(--spacing-xs);
+  color: #20231f;
+  font-size: clamp(1rem, 4vw, 1.35rem);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .card-preview {
@@ -28,8 +31,8 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  flex: 0 0 65%;
-  max-height: 65%;
+  flex: 0 0 58%;
+  max-height: 58%;
   min-height: 0;
   border: 1px solid #20231f;
   border-radius: 6px;
@@ -70,5 +73,5 @@
   line-height: 1.4;
   text-align: center;
   overflow-wrap: anywhere;
-  overflow: auto;
+  overflow-y: auto;
 }

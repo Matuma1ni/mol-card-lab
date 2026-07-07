@@ -1,13 +1,13 @@
 # mol-card-lab
 
-A prototype UI for viewing 3D molecular conformers generated via machine learning as collectible card game-style cards.
+A frontend-first prototype for depicting and viewing molecular structures as collectible card game-style cards, backed by a completed standalone conformer-generation spike.
 
 ## Project Overview
 
 This is an exploratory spike combining:
 - **Backend**: Python + `ml_conformer_generator` (EDM-based 3D conformer generation from reference molecules)
-- **Frontend**: React + TypeScript + Vite with a placeholder for future 3Dmol.js visualization
-- **Goal**: Prove the generator works locally and build a clean, maintainable card-based UI for browsing generated molecules
+- **Frontend**: React + TypeScript + Vite with a placeholder for future generated-conformer 3D visualization
+- **Goal**: Preserve the proven Phase 1 generator/data contract while adding 2D SMILES depiction, then 3D MolBlock visualization, before later browser-side WASM generation
 
 ## Architecture & Decision Records
 
@@ -44,10 +44,10 @@ These notes are intended to make onboarding easier and to keep the project align
 ### Frontend (React + Vite)
 1. **Mocked data**: Realistic molecules generated once offline from backend
 2. **`MoleculeCard.tsx`**: Collectible card component with molecule info
-3. **`MoleculeViewer3D.tsx`**: Placeholder viewer for future 3Dmol.js integration
+3. **`MoleculeViewer3D.tsx`**: Placeholder viewer for Phase 4 generated-conformer visualization
 4. **`App.tsx`**: Card grid/list UI
 
-RDKit.js/WebAssembly is a possible frontend-only enhancement for rendering a 2D SVG depiction from a SMILES string, useful as collectible card artwork. It does not replace the Python generation path, does not connect to `ml_conformer_generator`, and does not preserve generated 3D conformer coordinates. Backend output must continue to preserve `molBlock` for future real 3D rendering, likely with 3Dmol.js.
+Phase 2 will use RDKit.js for frontend-only SVG depiction from SMILES using a fixed local set of 10 molecule examples. Phase 3 will integrate the colleague's frontend-compatible WASM conformer generator behind an adapter. Phase 4 will add 3D visualization using actual generated geometry after its format is known.
 
 ## Setup Instructions
 
@@ -85,27 +85,27 @@ npm run dev
 
 Runs at http://localhost:5173
 
-## First Development Slice Tasks
+## Phase 1 Status
 
 - [x] Create minimal repo structure
-- [ ] Python backend + requirements
-- [ ] `generate_demo.py` script (load, generate, serialize)
-- [ ] Serialization utilities (Mol → JSON)
-- [ ] React/Vite frontend setup
-- [ ] `MoleculeCard` component
-- [ ] 3D viewer placeholder
-- [ ] Generate realistic mock data
-- [ ] Document assumptions
+- [x] Python backend + requirements
+- [x] `generate_demo.py` script (load, generate, serialize)
+- [x] Serialization utilities (Mol → JSON)
+- [x] React/Vite frontend setup
+- [x] `MoleculeCard` component
+- [x] 3D viewer placeholder
+- [x] Add realistic mock data
+- [x] Document assumptions
 
 ## Key Constraints & Decisions
 
 1. **Serialization**: MolBlock as primary geometry + coordinate arrays as derived debug/UI convenience data
 2. **Reference molecule**: Local `.mol` via `--reference-mol` / `-r` preferred; embedded `DEMO_SMILES` is smoke-test fallback only
 3. **Mock data**: Realistic—generated once from RDKit, committed to repo
-4. **No FastAPI yet**: Prove generator works first
+4. **API paused**: Do not add an interim backend API; browser-side WASM generation is the preferred later integration path
 5. **3D coordinates preserved**: MolBlock format, not bare SMILES
 6. **Model weights excluded**: `.gitignore` entries, user must download
-7. **RDKit.js scope**: Optional frontend 2D SMILES-to-SVG depiction only; not generation, backend integration, or 3D geometry
+7. **2D depiction scope**: Phase 2 frontend artwork from SMILES only; not generation, backend integration, or 3D geometry
 8. **Assumptions documented**: See `docs/ASSUMPTIONS.md`
 
 ## Performance Notes
@@ -114,16 +114,31 @@ Runs at http://localhost:5173
 - Model size: ~190 MB total (both weights)
 - License: Weights are CC BY-NC-ND 4.0 (non-commercial use only)
 
-## Next Steps (Beyond Phase 1)
+## Current Plan
 
-- [ ] FastAPI wrapper (`/api/generate`)
-- [ ] Database (store generated molecules)
-- [ ] Job queue (async generation)
-- [ ] Optional `Molecule2DPreview` using RDKit.js/WebAssembly for SMILES-derived SVG card artwork
-- [ ] Real 3D rendering with 3Dmol.js
-- [ ] PubChem/ChEMBL lookup (read-only)
-- [ ] Docker setup
-- [ ] RL fine-tuning interface
+### Phase 2: 2D SMILES visualization
+
+- Use exactly 10 predefined local molecule examples with `id`, label/name, SMILES, and current card metadata.
+- Use RDKit.js to parse the selected SMILES in-browser and render an SVG depiction.
+- Start with a random selection and retain a simple selection/cycling interaction that fits the existing UI.
+- Show a loading state while RDKit.js initializes and fall back gracefully when it fails or SMILES is invalid.
+- Reuse the existing mock-data and molecule-card flow; remain frontend-only.
+
+Out of scope: API/backend endpoints, WASM generation, full 3D viewing, uploads, persistence, queues, auth, deployment, lookups, editing, and saved results.
+
+### Phase 3: frontend WASM generation integration
+
+- Integrate the colleague's frontend-compatible generator once available.
+- Put it behind a frontend generator adapter.
+- Keep its output compatible with the current molecule-card data contract where practical, with MolBlock as primary generated 3D geometry when available.
+
+### Phase 4: 3D visualization of generated conformers
+
+- Select a lightweight browser viewer only after Phase 3 confirms the geometry format; Speck is a candidate, not a commitment.
+- Render actual generated conformers rather than hand-written temporary 3D examples.
+- Isolate viewer code and handle loading, invalid/missing geometry, and missing WebGL gracefully.
+
+API work is deferred because the preferred target architecture is browser-side generation via WebAssembly. This keeps the prototype aligned with a frontend-first deployment model and avoids introducing a backend boundary that may not be needed for generation. FastAPI, uvicorn, httpx, database, job queue, auth, and deployment are not planned for these phases.
 
 ## License & Attribution
 

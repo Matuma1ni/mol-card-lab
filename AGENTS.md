@@ -26,11 +26,24 @@ Do not add in Phase 1:
 
 ## Frontend rendering scope
 
-- Python remains the generation/runtime integration path because `ml_conformer_generator` is a Python library.
-- RDKit.js/WebAssembly may be considered for frontend-only 2D depiction from a SMILES string.
+- Phase 1's Python path remains the proven generation/runtime spike.
+- Phase 2 is frontend-only RDKit.js 2D depiction from a fixed local set of 10 SMILES examples.
+- Phase 3 integrates the colleague's frontend-compatible WebAssembly generator behind a frontend adapter.
+- Phase 4 adds 3D visualization of actual generated conformers after the geometry format is known.
+- RDKit.js must be used for Phase 2 SMILES parsing and SVG depiction.
 - Any RDKit.js-rendered SVG is card preview/artwork only; it is not the generator, backend connector, or source of 3D geometry.
-- MolBlock remains the primary generated conformer geometry representation for future real 3D visualization, likely with 3Dmol.js.
-- If added, a `Molecule2DPreview` should be treated as an optional Phase 1.5 or later enhancement, not a Phase 1 success criterion unless already implemented.
+- MolBlock remains the Phase 1 primary generated conformer geometry representation; Phase 4 viewer selection depends on the actual Phase 3 output format.
+- A `Molecule2DPreview` is now a Phase 2 deliverable; it was not a Phase 1 success criterion.
+
+## Current roadmap constraints
+
+- Do not implement or plan an API/backend endpoint for Phases 2–4.
+- Do not add FastAPI, uvicorn, httpx, database, job queue, auth, or deployment work.
+- Keep Phase 2 on the existing local mock/frontend data flow.
+- Keep RDKit.js initialization and any SVG injection isolated in a small Phase 2 component/helper.
+- For Phase 3, define a frontend generator adapter and preserve compatibility with the molecule-card data contract where practical.
+- Choose the Phase 4 viewer only after Phase 3 confirms the generated geometry format; evaluate Speck then, not in Phase 2.
+- API work is deferred because browser-side WASM generation is the preferred target architecture.
 
 ## Reference molecule handling
 
