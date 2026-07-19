@@ -12,6 +12,7 @@ export interface Conformer {
   id: string
   name: string
   smiles: string
+  molecularWeight?: number
   molBlock: string
   coordinates: [number, number, number][]
   num_atoms: number
