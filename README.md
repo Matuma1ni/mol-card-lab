@@ -6,7 +6,7 @@ A frontend-first prototype for depicting and viewing molecular structures as col
 
 This is an exploratory spike combining:
 - **Backend**: Python + `ml_conformer_generator` (EDM-based 3D conformer generation from reference molecules)
-- **Frontend**: React + TypeScript + Vite with a placeholder for future generated-conformer 3D visualization
+- **Frontend**: React + TypeScript + Vite with a placeholder for future 3Dmol.js visualization
 - **Goal**: Preserve the proven Phase 1 generator/data contract while adding 2D SMILES depiction, then 3D MolBlock visualization, before later browser-side WASM generation
 
 ## Architecture & Decision Records
@@ -44,10 +44,10 @@ These notes are intended to make onboarding easier and to keep the project align
 ### Frontend (React + Vite)
 1. **Mocked data**: Realistic molecules generated once offline from backend
 2. **`MoleculeCard.tsx`**: Collectible card component with molecule info
-3. **`MoleculeViewer3D.tsx`**: Placeholder viewer for Phase 4 generated-conformer visualization
+3. **`MoleculeViewer3D.tsx`**: Placeholder viewer for future 3Dmol.js integration
 4. **`App.tsx`**: Card grid/list UI
 
-Phase 2 will use RDKit.js for frontend-only SVG depiction from SMILES using a fixed local set of 10 molecule examples. Phase 3 will integrate the colleague's frontend-compatible WASM conformer generator behind an adapter. Phase 4 will add 3D visualization using actual generated geometry after its format is known.
+Phase 2 will add frontend-only 2D depiction from SMILES using a fixed local set of 10 molecule examples. The depiction is card artwork; it does not preserve generated 3D coordinates. Phase 2.5 will add a real 3D viewer. A later phase will integrate the frontend-compatible WASM conformer generator behind a frontend adapter.
 
 ## Setup Instructions
 
@@ -119,26 +119,26 @@ Runs at http://localhost:5173
 ### Phase 2: 2D SMILES visualization
 
 - Use exactly 10 predefined local molecule examples with `id`, label/name, SMILES, and current card metadata.
-- Use RDKit.js to parse the selected SMILES in-browser and render an SVG depiction.
+- Render the selected molecule as a real 2D depiction from SMILES.
 - Start with a random selection and retain a simple selection/cycling interaction that fits the existing UI.
-- Show a loading state while RDKit.js initializes and fall back gracefully when it fails or SMILES is invalid.
+- Fall back gracefully when the renderer fails or SMILES is invalid.
 - Reuse the existing mock-data and molecule-card flow; remain frontend-only.
 
 Out of scope: API/backend endpoints, WASM generation, full 3D viewing, uploads, persistence, queues, auth, deployment, lookups, editing, and saved results.
 
-### Phase 3: frontend WASM generation integration
+### Phase 2.5: 3D visualization
 
-- Integrate the colleague's frontend-compatible generator once available.
+- Replace the placeholder with a real 3D viewer using existing MolBlock or prepared local 3D examples.
+- Keep selection and viewer state synchronized and handle invalid/missing geometry gracefully.
+- Remain frontend-only and visualization-only, with no API or generation integration.
+
+### Later: WASM generation integration
+
+- Integrate the frontend-compatible generator once available.
 - Put it behind a frontend generator adapter.
 - Keep its output compatible with the current molecule-card data contract where practical, with MolBlock as primary generated 3D geometry when available.
 
-### Phase 4: 3D visualization of generated conformers
-
-- Select a lightweight browser viewer only after Phase 3 confirms the geometry format; Speck is a candidate, not a commitment.
-- Render actual generated conformers rather than hand-written temporary 3D examples.
-- Isolate viewer code and handle loading, invalid/missing geometry, and missing WebGL gracefully.
-
-API work is deferred because the preferred target architecture is browser-side generation via WebAssembly. This keeps the prototype aligned with a frontend-first deployment model and avoids introducing a backend boundary that may not be needed for generation. FastAPI, uvicorn, httpx, database, job queue, auth, and deployment are not planned for these phases.
+API work is paused because the preferred architecture is browser-side WASM generation. FastAPI, uvicorn, httpx, database, job queue, auth, and deployment are not planned for these phases.
 
 ## License & Attribution
 

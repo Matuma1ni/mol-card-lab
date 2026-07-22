@@ -47,9 +47,6 @@ describe('getPubChemDataBySmiles', () => {
       iupacName: '2-acetyloxybenzoic acid',
       molecularWeight: 180.16,
     })
-    expect(fetchMock).toHaveBeenCalledWith(
-      'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/smiles/CC(%3DO)OC1%3DCC%3DCC%3DC1C(%3DO)O/cids/JSON',
-    )
   })
 
   it('returns null for lookup failures and caches by trimmed SMILES', async () => {

@@ -15,42 +15,51 @@ function shouldShowIupacName(
 }
 
 export const MoleculeCard: React.FC<MoleculeCardProps> = ({
-  conformer,
+  className,
+  smiles,
   onLoadingChange,
 }) => {
   const [pubChem, setPubChem] = useState<PubChemEnrichment | null>(null)
+  const [pubChemPending, setPubChemPending] = useState(true)
+  const [previewPending, setPreviewPending] = useState(true)
 
   useEffect(() => {
     let active = true
     setPubChem(null)
+    setPubChemPending(true)
 
-    getPubChemDataBySmiles(conformer.smiles).then((enrichment) => {
-      if (active) setPubChem(enrichment)
+    getPubChemDataBySmiles(smiles).then((enrichment) => {
+      if (!active) return
+      setPubChem(enrichment)
+      setPubChemPending(false)
     })
 
     return () => {
       active = false
     }
-  }, [conformer.smiles])
+  }, [smiles])
 
-  const displayTitle = pubChem?.title ?? conformer.name
+  useEffect(() => {
+    onLoadingChange?.(pubChemPending || previewPending)
+  }, [onLoadingChange, previewPending, pubChemPending])
+
+  const displayTitle = pubChem?.title ?? 'Molecule'
   const displayIupacName = shouldShowIupacName(
     pubChem?.iupacName,
     displayTitle,
   )
     ? pubChem.iupacName
     : undefined
-  const molecularWeight = pubChem?.molecularWeight ?? conformer.molecularWeight
   const molecularWeightLabel =
-    molecularWeight === undefined ? 'MW --' : `MW ${molecularWeight}`
+    pubChem?.molecularWeight === undefined ? 'MW --' : `MW ${pubChem.molecularWeight}`
 
   return (
-    <article className="molecule-card">
+    <article className={className ? `molecule-card ${className}` : 'molecule-card'}>
       <h2 className="card-title">{displayTitle}</h2>
       <div className="card-preview">
         <Molecule2DPreview
-          smiles={conformer.smiles}
-          onLoadingChange={onLoadingChange}
+          smiles={smiles}
+          onLoadingChange={setPreviewPending}
         />
       </div>
 
@@ -59,11 +68,11 @@ export const MoleculeCard: React.FC<MoleculeCardProps> = ({
           <div className="card-iupac-name">{displayIupacName}</div>
         )}
         <div className="card-label">SMILES</div>
-        <div className="card-smiles">{conformer.smiles}</div>
+        <div className="card-smiles">{smiles}</div>
       </div>
       <div
         className={
-          molecularWeight === undefined
+          pubChem?.molecularWeight === undefined
             ? 'card-stat card-stat--unavailable'
             : 'card-stat'
         }

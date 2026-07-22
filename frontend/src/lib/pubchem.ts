@@ -67,10 +67,9 @@ async function fetchPubChemDataBySmiles(
   if (!isObject(propertyRecord)) return null
 
   const properties = propertyRecord as PubChemPropertyRecord
-  const recordCid = asNumber(properties.CID) ?? cid
 
   return {
-    cid: recordCid,
+    cid: asNumber(properties.CID) ?? cid,
     title: asString(properties.Title),
     iupacName: asString(properties.IUPACName),
     molecularWeight: asNumber(properties.MolecularWeight),
