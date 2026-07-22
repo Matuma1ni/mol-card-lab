@@ -27,23 +27,22 @@ Do not add in Phase 1:
 ## Frontend rendering scope
 
 - Phase 1's Python path remains the proven generation/runtime spike.
-- Phase 2 is frontend-only RDKit.js 2D depiction from a fixed local set of 10 SMILES examples.
-- Phase 3 integrates the colleague's frontend-compatible WebAssembly generator behind a frontend adapter.
-- Phase 4 adds 3D visualization of actual generated conformers after the geometry format is known.
-- RDKit.js must be used for Phase 2 SMILES parsing and SVG depiction.
+- Phase 2 is frontend-only 2D depiction from a fixed local set of 10 SMILES examples.
+- Phase 2.5 is frontend-only 3D visualization.
+- Browser-side generator integration waits for the frontend-compatible WebAssembly library.
+- RDKit.js/WebAssembly or another suitable browser library may be used for frontend-only 2D depiction from a SMILES string.
 - Any RDKit.js-rendered SVG is card preview/artwork only; it is not the generator, backend connector, or source of 3D geometry.
-- MolBlock remains the Phase 1 primary generated conformer geometry representation; Phase 4 viewer selection depends on the actual Phase 3 output format.
+- MolBlock remains the primary generated conformer geometry representation for future real 3D visualization, likely with 3Dmol.js.
 - A `Molecule2DPreview` is now a Phase 2 deliverable; it was not a Phase 1 success criterion.
 
 ## Current roadmap constraints
 
-- Do not implement or plan an API/backend endpoint for Phases 2–4.
+- Do not implement or plan an API/backend endpoint for Phase 2 or Phase 2.5.
 - Do not add FastAPI, uvicorn, httpx, database, job queue, auth, or deployment work.
 - Keep Phase 2 on the existing local mock/frontend data flow.
-- Keep RDKit.js initialization and any SVG injection isolated in a small Phase 2 component/helper.
-- For Phase 3, define a frontend generator adapter and preserve compatibility with the molecule-card data contract where practical.
-- Choose the Phase 4 viewer only after Phase 3 confirms the generated geometry format; evaluate Speck then, not in Phase 2.
-- API work is deferred because browser-side WASM generation is the preferred target architecture.
+- Keep Phase 2.5 visualization-only; do not integrate conformer generation.
+- For the later WASM phase, define a frontend generator adapter and preserve compatibility with the molecule-card data contract where practical.
+- API work is paused because browser-side WASM generation is the preferred integration path once the updated library is available.
 
 ## Reference molecule handling
 

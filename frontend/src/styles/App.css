@@ -30,6 +30,7 @@
 }
 
 .card-stage {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -51,6 +52,44 @@
 .pick-another-button:disabled {
   cursor: wait;
   opacity: 0.55;
+}
+
+.pick-another-button--loading {
+  position: relative;
+  padding-left: 2.25rem;
+}
+
+.pick-another-button--loading::before {
+  position: absolute;
+  left: var(--spacing-md);
+  top: 50%;
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-top: -0.4rem;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: #ffffff;
+  border-radius: 999px;
+  content: '';
+  animation: pick-another-spin 0.75s linear infinite;
+}
+
+.card-preloader {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.molecule-card--pending {
+  opacity: 0.55;
+}
+
+@keyframes pick-another-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 720px) {

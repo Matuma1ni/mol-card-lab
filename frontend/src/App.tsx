@@ -1,35 +1,39 @@
 import { useState } from 'react'
 import MoleculeCard from './components/MoleculeCard'
-import { getMockConformerSet } from './data/mockMolecules'
-import { Conformer } from './types/molecule'
+import { getMockSmilesSet } from './data/mockMolecules'
+import { SmilesExample } from './types/molecule'
 
-function randomInitialId(conformerIds: string[]): string {
-  if (conformerIds.length === 0) return ''
-  return conformerIds[Math.floor(Math.random() * conformerIds.length)]
+function randomInitialId(moleculeIds: string[]): string {
+  if (moleculeIds.length === 0) return ''
+  return moleculeIds[Math.floor(Math.random() * moleculeIds.length)]
 }
 
-export function pickDifferentId(conformerIds: string[], currentId: string): string {
-  if (conformerIds.length < 2) return conformerIds[0] ?? ''
+export function pickDifferentId(moleculeIds: string[], currentId: string): string {
+  if (moleculeIds.length < 2) return moleculeIds[0] ?? ''
 
-  const currentIndex = conformerIds.indexOf(currentId)
-  if (currentIndex < 0) return randomInitialId(conformerIds)
+  const currentIndex = moleculeIds.indexOf(currentId)
+  if (currentIndex < 0) return randomInitialId(moleculeIds)
 
-  const otherIndex = Math.floor(Math.random() * (conformerIds.length - 1))
-  return conformerIds[otherIndex >= currentIndex ? otherIndex + 1 : otherIndex]
+  const otherIndex = Math.floor(Math.random() * (moleculeIds.length - 1))
+  return moleculeIds[otherIndex >= currentIndex ? otherIndex + 1 : otherIndex]
 }
 
 function App() {
-  const conformerSet = getMockConformerSet()
-  const conformers = conformerSet.conformers
-  const conformerIds = conformers.map((conformer) => conformer.id)
-  const [selectedConformerId, setSelectedConformerId] = useState(() =>
-    randomInitialId(conformerIds),
+  const moleculeSet = getMockSmilesSet()
+  const molecules = moleculeSet.molecules
+  const moleculeIds = molecules.map((molecule) => molecule.id)
+  const [selectedMoleculeId, setSelectedMoleculeId] = useState(() =>
+    randomInitialId(moleculeIds),
   )
-  const [previewPending, setPreviewPending] = useState(true)
+  const [pendingMoleculeId, setPendingMoleculeId] = useState<string | null>(null)
+  const [cardPending, setCardPending] = useState(true)
 
-  const selectedConformer: Conformer | undefined = conformers.find(
-    (c) => c.id === selectedConformerId
-  ) || conformers[0]
+  const selectedMolecule: SmilesExample | undefined = molecules.find(
+    (molecule) => molecule.id === selectedMoleculeId
+  ) || molecules[0]
+  const pendingMolecule: SmilesExample | undefined = pendingMoleculeId
+    ? molecules.find((molecule) => molecule.id === pendingMoleculeId)
+    : undefined
 
   return (
     <div className="app">
@@ -40,24 +44,40 @@ function App() {
 
       <main className="app-container">
         <section className="card-stage" aria-label="Selected molecule card">
-          {selectedConformer && (
+          {selectedMolecule && (
             <>
               <MoleculeCard
-                conformer={selectedConformer}
-                onLoadingChange={setPreviewPending}
+                smiles={selectedMolecule.smiles}
+                className={pendingMolecule ? 'molecule-card--pending' : undefined}
+                onLoadingChange={setCardPending}
               />
+              {pendingMolecule && (
+                <div className="card-preloader" aria-hidden="true">
+                  <MoleculeCard
+                    smiles={pendingMolecule.smiles}
+                    onLoadingChange={(loading) => {
+                      if (loading) return
+                      setSelectedMoleculeId(pendingMolecule.id)
+                      setPendingMoleculeId(null)
+                    }}
+                  />
+                </div>
+              )}
               <button
-                className="pick-another-button"
+                className={
+                  cardPending || pendingMolecule
+                    ? 'pick-another-button pick-another-button--loading'
+                    : 'pick-another-button'
+                }
                 type="button"
-                disabled={previewPending}
+                disabled={cardPending || Boolean(pendingMolecule)}
+                aria-busy={cardPending || pendingMolecule ? 'true' : undefined}
                 onClick={() => {
-                  setPreviewPending(true)
-                  setSelectedConformerId((currentId) =>
-                    pickDifferentId(conformerIds, currentId),
-                  )
+                  const nextId = pickDifferentId(moleculeIds, selectedMoleculeId)
+                  if (nextId) setPendingMoleculeId(nextId)
                 }}
               >
-                Pick another
+                {cardPending || pendingMolecule ? 'Loading…' : 'Pick another'}
               </button>
             </>
           )}

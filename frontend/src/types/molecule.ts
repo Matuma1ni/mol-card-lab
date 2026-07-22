@@ -27,8 +27,20 @@ export interface ConformerSet {
 // TypeScript utility types for common operations
 export type ConformerID = string
 
+export interface SmilesExample {
+  id: string
+  smiles: string
+}
+
+export interface SmilesExampleSet {
+  molecules: SmilesExample[]
+  count: number
+  metadata?: Record<string, unknown>
+}
+
 export interface MoleculeCardProps {
-  conformer: Conformer
+  smiles: string
+  className?: string
   onLoadingChange?: (loading: boolean) => void
 }
 

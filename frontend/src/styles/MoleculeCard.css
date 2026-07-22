@@ -19,10 +19,15 @@
 .card-title {
   flex: 0 0 auto;
   margin: 0 0 var(--spacing-sm);
-  padding: 0 var(--spacing-xs);
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid #20231f;
+  border-radius: var(--radius-sm);
+  background: #e3e9dd;
   color: #20231f;
   font-size: clamp(1rem, 4vw, 1.35rem);
   line-height: 1.25;
+  text-align: left;
   overflow-wrap: anywhere;
 }
 
@@ -56,6 +61,15 @@
   overflow: hidden;
 }
 
+.card-iupac-name {
+  color: #3e453d;
+  font-size: 0.82rem;
+  font-weight: 400;
+  line-height: 1.3;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
 .card-label {
   color: #667063;
   font-size: 0.75rem;
@@ -74,4 +88,23 @@
   text-align: center;
   overflow-wrap: anywhere;
   overflow-y: auto;
+}
+
+.card-stat {
+  align-self: flex-end;
+  flex: 0 0 auto;
+  margin-top: var(--spacing-sm);
+  padding: 0.2rem 0.45rem;
+  border: 1px solid #20231f;
+  border-radius: var(--radius-sm);
+  background: #f6f7f4;
+  color: #20231f;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.card-stat--unavailable {
+  color: #667063;
 }

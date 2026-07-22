@@ -2,17 +2,25 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App, { pickDifferentId } from './App'
 
-let reportLoading: ((loading: boolean) => void) | undefined
+const reportLoadingBySmiles = new Map<string, (loading: boolean) => void>()
 
 vi.mock('./components/MoleculeCard', () => ({
-  default: ({ conformer, onLoadingChange }: { conformer: { name: string }; onLoadingChange: (loading: boolean) => void }) => {
-    reportLoading = onLoadingChange
-    return <article data-testid="card">{conformer.name}</article>
+  default: ({
+    className,
+    smiles,
+    onLoadingChange,
+  }: {
+    className?: string
+    smiles: string
+    onLoadingChange: (loading: boolean) => void
+  }) => {
+    reportLoadingBySmiles.set(smiles, onLoadingChange)
+    return <article className={className} data-testid="card">{smiles}</article>
   },
 }))
 
 beforeEach(() => {
-  reportLoading = undefined
+  reportLoadingBySmiles.clear()
   vi.restoreAllMocks()
 })
 
@@ -20,7 +28,7 @@ describe('App selection', () => {
   it('selects randomly once and keeps the selection across ordinary rerenders', () => {
     const random = vi.spyOn(Math, 'random').mockReturnValue(0.45)
     const { rerender } = render(<App />)
-    expect(screen.getByText('Naproxen')).toBeInTheDocument()
+    expect(screen.getByText('COc1ccc2cc([C@@H](C)C(=O)O)ccc2c1')).toBeInTheDocument()
     rerender(<App />)
     expect(random).toHaveBeenCalledTimes(1)
   })
@@ -29,22 +37,29 @@ describe('App selection', () => {
     vi.spyOn(Math, 'random').mockReturnValue(0)
     render(<App />)
     const card = screen.getByTestId('card')
-    const button = screen.getByRole('button', { name: 'Pick another' })
+    const button = screen.getByRole('button', { name: 'Loading…' })
     expect(card.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     expect(button).toBeDisabled()
-    act(() => reportLoading?.(false))
-    expect(button).toBeEnabled()
-    act(() => reportLoading?.(true))
-    expect(button).toBeDisabled()
+    act(() => reportLoadingBySmiles.get('CC(=O)Oc1ccccc1C(=O)O')?.(false))
+    expect(screen.getByRole('button', { name: 'Pick another' })).toBeEnabled()
+    act(() => reportLoadingBySmiles.get('CC(=O)Oc1ccccc1C(=O)O')?.(true))
+    expect(screen.getByRole('button', { name: 'Loading…' })).toBeDisabled()
   })
 
-  it('always changes to a different molecule', () => {
+  it('keeps the previous molecule visible until the next one finishes loading', () => {
     vi.spyOn(Math, 'random').mockReturnValueOnce(0).mockReturnValueOnce(0)
     render(<App />)
-    act(() => reportLoading?.(false))
+    act(() => reportLoadingBySmiles.get('CC(=O)Oc1ccccc1C(=O)O')?.(false))
     fireEvent.click(screen.getByRole('button', { name: 'Pick another' }))
-    expect(screen.queryByText('Aspirin')).not.toBeInTheDocument()
-    expect(screen.getByText('Caffeine')).toBeInTheDocument()
+
+    expect(screen.getByText('CC(=O)Oc1ccccc1C(=O)O')).toBeInTheDocument()
+    expect(screen.getByText('CC(=O)Oc1ccccc1C(=O)O').closest('article')).toHaveClass('molecule-card--pending')
+    expect(screen.getByRole('button', { name: 'Loading…' })).toBeDisabled()
+
+    act(() => reportLoadingBySmiles.get('CN1C(=O)N(C)c2ncn(C)c2C1=O')?.(false))
+
+    expect(screen.queryByText('CC(=O)Oc1ccccc1C(=O)O')).not.toBeInTheDocument()
+    expect(screen.getByText('CN1C(=O)N(C)c2ncn(C)c2C1=O')).toBeInTheDocument()
   })
 })
 
