@@ -1,13 +1,13 @@
 # mol-card-lab
 
-A frontend-first prototype for depicting and viewing molecular structures as collectible card game-style cards, backed by a completed standalone conformer-generation spike.
+A frontend-first prototype for depicting and viewing molecular structures as collectible card game-style cards, backed by a completed standalone conformer-generation spike and a planned browser-side JS runtime integration.
 
 ## Project Overview
 
 This is an exploratory spike combining:
 - **Backend**: Python + `ml_conformer_generator` (EDM-based 3D conformer generation from reference molecules)
 - **Frontend**: React + TypeScript + Vite with a placeholder for future 3Dmol.js visualization
-- **Goal**: Preserve the proven Phase 1 generator/data contract while adding 2D SMILES depiction, then 3D MolBlock visualization, before later browser-side WASM generation
+- **Goal**: Preserve the proven Phase 1 generator/data contract while adding 2D SMILES depiction, then browser-side `mlconfgen` generation, then 3D MolBlock visualization
 
 ## Architecture & Decision Records
 
@@ -47,7 +47,7 @@ These notes are intended to make onboarding easier and to keep the project align
 3. **`MoleculeViewer3D.tsx`**: Placeholder viewer for future 3Dmol.js integration
 4. **`App.tsx`**: Card grid/list UI
 
-Phase 2 will add frontend-only 2D depiction from SMILES using a fixed local set of 10 molecule examples. The depiction is card artwork; it does not preserve generated 3D coordinates. Phase 2.5 will add a real 3D viewer. A later phase will integrate the frontend-compatible WASM conformer generator behind a frontend adapter.
+Phase 2 adds frontend-only 2D depiction from SMILES using a fixed local set of 10 molecule examples. The depiction is card artwork; it does not preserve generated 3D coordinates. Phase 3 integrates the `mlconfgen` JS runtime behind a frontend adapter after its browser runtime and model-asset configuration are proven. Phase 4 adds a real 3D viewer for the confirmed generated geometry.
 
 ## Setup Instructions
 
@@ -126,17 +126,18 @@ Runs at http://localhost:5173
 
 Out of scope: API/backend endpoints, WASM generation, full 3D viewing, uploads, persistence, queues, auth, deployment, lookups, editing, and saved results.
 
-### Phase 2.5: 3D visualization
+### Phase 3: JS runtime / WASM-compatible generation
 
-- Replace the placeholder with a real 3D viewer using existing MolBlock or prepared local 3D examples.
-- Keep selection and viewer state synchronized and handle invalid/missing geometry gracefully.
-- Remain frontend-only and visualization-only, with no API or generation integration.
+- Install `mlconfgen` and isolate `MLConformerGenerator`, `seed`, ONNX Runtime, and model paths behind a frontend generator adapter.
+- Prove an explicit browser ONNX Runtime build (for example `onnxruntime-web`) before UI wiring; the package currently defaults to Node-oriented `onnxruntime-node`.
+- Load separately obtained `egnn_chembl_15_39.onnx` and `adj_mat_seer_chembl_15_39.onnx` without committing them.
+- Normalize `generateConformers` output with `mol.toMolBlock()` as authoritative geometry. Validity filtering can yield fewer results than requested.
+- Keep this local to the browser with no API/backend boundary; fixed-fragment inpainting / IFM merge are not in the JS runtime scope.
 
-### Later: WASM generation integration
+### Phase 4: 3D visualization of generated conformers
 
-- Integrate the frontend-compatible generator once available.
-- Put it behind a frontend generator adapter.
-- Keep its output compatible with the current molecule-card data contract where practical, with MolBlock as primary generated 3D geometry when available.
+- Select and integrate a real 3D viewer only after Phase 3 confirms the generated geometry/output format.
+- Render actual generated conformers, keep selection synchronized, and handle invalid or missing geometry gracefully.
 
 API work is paused because the preferred architecture is browser-side WASM generation. FastAPI, uvicorn, httpx, database, job queue, auth, and deployment are not planned for these phases.
 

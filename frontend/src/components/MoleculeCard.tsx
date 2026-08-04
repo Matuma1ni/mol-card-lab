@@ -17,6 +17,7 @@ function shouldShowIupacName(
 export const MoleculeCard: React.FC<MoleculeCardProps> = ({
   className,
   smiles,
+  molBlock,
   onLoadingChange,
 }) => {
   const [pubChem, setPubChem] = useState<PubChemEnrichment | null>(null)
@@ -26,6 +27,10 @@ export const MoleculeCard: React.FC<MoleculeCardProps> = ({
   useEffect(() => {
     let active = true
     setPubChem(null)
+    if (!smiles) {
+      setPubChemPending(false)
+      return () => { active = false }
+    }
     setPubChemPending(true)
 
     getPubChemDataBySmiles(smiles).then((enrichment) => {
@@ -43,7 +48,7 @@ export const MoleculeCard: React.FC<MoleculeCardProps> = ({
     onLoadingChange?.(pubChemPending || previewPending)
   }, [onLoadingChange, previewPending, pubChemPending])
 
-  const displayTitle = pubChem?.title ?? 'Molecule'
+  const displayTitle = pubChem?.title ?? (molBlock ? 'Generated molecule' : 'Molecule')
   const displayIupacName = shouldShowIupacName(
     pubChem?.iupacName,
     displayTitle,
@@ -59,6 +64,7 @@ export const MoleculeCard: React.FC<MoleculeCardProps> = ({
       <div className="card-preview">
         <Molecule2DPreview
           smiles={smiles}
+          molBlock={molBlock}
           onLoadingChange={setPreviewPending}
         />
       </div>
@@ -67,8 +73,7 @@ export const MoleculeCard: React.FC<MoleculeCardProps> = ({
         {displayIupacName && (
           <div className="card-iupac-name">{displayIupacName}</div>
         )}
-        <div className="card-label">SMILES</div>
-        <div className="card-smiles">{smiles}</div>
+        {smiles && <><div className="card-label">SMILES</div><div className="card-smiles">{smiles}</div></>}
       </div>
       <div
         className={

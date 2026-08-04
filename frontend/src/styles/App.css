@@ -86,10 +86,67 @@
   opacity: 0.55;
 }
 
+.generation-status {
+  width: 100%;
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  border: 1px solid #d9ddd3;
+  border-radius: 0.5rem;
+  background: #e3e9dd;
+}
+
+.generation-status h2 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.generation-status p {
+  margin: var(--spacing-sm) 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.generate-conformers-button {
+  width: 100%;
+  min-height: 44px;
+  margin-top: var(--spacing-sm);
+  border: 1px solid #31583d;
+  border-radius: 0.5rem;
+  background: #557c62;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.generate-conformers-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.generated-selector {
+  display: grid;
+  width: 100%;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  font-weight: 700;
+}
+
+.generated-selector select {
+  min-height: 44px;
+  border: 1px solid #31583d;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #20231f;
+}
+
 @keyframes pick-another-spin {
   to {
     transform: rotate(360deg);
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pick-another-button--loading::before { animation: none; }
 }
 
 @media (max-width: 720px) {

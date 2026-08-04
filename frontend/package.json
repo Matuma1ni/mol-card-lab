@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "copy:rdkit-assets": "mkdir -p public/rdkit && cp node_modules/@rdkit/rdkit/dist/RDKit_minimal.js node_modules/@rdkit/rdkit/dist/RDKit_minimal.wasm public/rdkit/",
-    "prebuild": "npm run copy:rdkit-assets",
+    "copy:ort-assets": "mkdir -p public/ort && cp node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm public/ort/",
+    "predev": "npm run copy:ort-assets",
+    "prebuild": "npm run copy:rdkit-assets && npm run copy:ort-assets",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
@@ -14,6 +16,8 @@
   },
   "dependencies": {
     "@rdkit/rdkit": "2025.3.4-1.0.0",
+    "mlconfgen": "^0.1.0",
+    "onnxruntime-web": "^1.27.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

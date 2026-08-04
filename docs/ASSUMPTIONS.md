@@ -60,11 +60,11 @@
 ---
 
 ### 6. API Work Paused
-**Assumption**: `generate_demo.py` remains the completed standalone Phase 1 path. Phase 2 adds RDKit.js depiction, Phase 3 adds browser-side generation, and Phase 4 adds generated-conformer 3D visualization without an HTTP API.
+**Assumption**: `generate_demo.py` remains the completed standalone Phase 1 path. Phase 2 adds RDKit.js depiction, Phase 3 adds browser-side generation through the `mlconfgen` JS runtime, and Phase 4 adds generated-conformer 3D visualization without an HTTP API.
 
-**Rationale**: The conformer generator  is being updated for frontend WebAssembly use, so a browser-side adapter is the preferred future integration path.
+**Rationale**: The JS runtime exposes `MLConformerGenerator.create()` and `generateConformers()` and can accept an explicitly supplied browser ONNX Runtime build, so a browser-side adapter is the preferred integration path.
 
-**Risk**: The delivered WASM interface may differ from current expectations. Mitigation: wait for the concrete interface and isolate it behind a frontend generator adapter.
+**Risk**: The package currently defaults to `onnxruntime-node` and Node 18+, so browser compatibility is not proven merely by the JS API. Mitigation: Phase 3 begins with a browser-runtime/assets proof and isolates all runtime details behind a frontend generator adapter.
 
 ---
 
@@ -92,8 +92,8 @@
 - [ ] How many conformers are "enough" for a good UX? (Start with 5–10 for speed)
 - [ ] Should Phase 2 use only next/previous controls, only random selection, or both? (Prefer the smallest interaction that fits the existing UI.)
 - [ ] How to handle molecule uniqueness? (Coordinate-based vs. SMILES-based deduplication)
-- [ ] What geometry format will Phase 3 expose, and will the Phase 4 viewer need conversion?
-- [ ] What exact input/output contract will the frontend-compatible WASM generator expose?
+- [ ] Can `mlconfgen` run in the target Vite/browser environment when passed `onnxruntime-web`, including its RDKit dependency and model assets?
+- [ ] Which browser-safe model-asset delivery approach keeps the separately obtained ONNX weights out of git while allowing local development?
 - [ ] Which lightweight 3D viewer best fits the confirmed generated geometry format? (Evaluate Speck only in Phase 4.)
 - [ ] How to structure state management in React for large conformer sets?
 

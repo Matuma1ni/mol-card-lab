@@ -47,4 +47,19 @@ describe('MoleculeCard', () => {
     expect(screen.getByText('2-acetyloxybenzoic acid')).toBeInTheDocument()
     expect(screen.getByLabelText('Molecular weight')).toHaveTextContent('MW 180.16')
   })
+
+  it('enriches a generated MolBlock using its derived SMILES', async () => {
+    vi.mocked(getPubChemDataBySmiles).mockResolvedValue({
+      cid: 702,
+      title: 'Ethanol',
+      iupacName: 'ethanol',
+      molecularWeight: 46.07,
+    })
+
+    render(<MoleculeCard smiles="CCO" molBlock="generated molblock" />)
+
+    expect(await screen.findByRole('heading', { name: 'Ethanol' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Molecular weight')).toHaveTextContent('MW 46.07')
+    expect(getPubChemDataBySmiles).toHaveBeenCalledWith('CCO')
+  })
 })

@@ -1,6 +1,8 @@
 {
   "projectName": "mol-card-lab",
-  "workflow": "gsd-new-project",
+  "workflow": {
+    "use_worktrees": false
+  },
   "auto": false,
   "createdAt": "2026-06-22T00:00:00Z",
   "phaseFocus": "integration spike",

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Phase 2 context gathered
-last_updated: "2026-07-05T22:02:39.091Z"
+stopped_at: Phase 3 UI-SPEC reapproved with fixture request mapping
+last_updated: "2026-08-02T20:41:13.850Z"
 progress:
   total_phases: 4
-  completed_phases: 0
-  total_plans: 3
-  completed_plans: 0
-  percent: 0
+  completed_phases: 1
+  total_plans: 7
+  completed_plans: 5
+  percent: 25
 ---
 
 # STATE
@@ -25,7 +25,7 @@ progress:
 - Non-goals: FastAPI, database, auth, job queue, browser-side ONNX, RL fine-tuning
 - Key constraint: preserve 3D coordinates with MolBlock/SDF
 - Frontend rendering note: Phase 2 is RDKit.js SMILES-to-SVG depiction
-- Integration direction: Phase 3 integrates the frontend-compatible WASM generator behind an adapter
+- Integration direction: Phase 3 integrates `mlconfgen` behind an adapter, contingent on a proven browser-compatible ONNX Runtime build
 - 3D direction: Phase 4 renders actual generated conformers after the geometry format is known
 - API decision: deferred; do not plan an interim API for Phases 2–4
 - Model weights: manual download, kept out of git
@@ -41,7 +41,7 @@ progress:
 
 - Phase 1: complete scaffold and standalone generation spike
 - Phase 2: RDKit.js 2D SMILES visualization from 10 fixed local examples
-- Phase 3: frontend WASM generator adapter and browser-side generation
+- Phase 3: `mlconfgen` generator adapter and browser-side ONNX/WASM generation
 - Phase 4: 3D visualization of actual generated conformers
 
 ## Direction change
@@ -51,6 +51,6 @@ progress:
 
 ## Session
 
-**Last session:** 2026-07-05T22:02:39.079Z
-**Stopped at:** Phase 2 context gathered
-**Resume file:** .planning/phases/02-smiles-2d-visualization/02-CONTEXT.md
+**Last session:** 2026-08-02T20:41:13.835Z
+**Stopped at:** Phase 3 UI-SPEC reapproved with fixture request mapping
+**Resume file:** .planning/phases/03-frontend-wasm-generation/03-UI-SPEC.md

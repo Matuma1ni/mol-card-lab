@@ -35,6 +35,11 @@ backend/data/model_weights/*.pt
 backend/data/model_weights/*.onnx
 !backend/data/model_weights/.gitkeep
 
+# Browser-local ONNX weights are obtained manually and must stay untracked.
+frontend/public/models/*.onnx
+frontend/public/models/*.pt
+!frontend/public/models/.gitkeep
+
 # Generated outputs
 backend/data/output/*.json
 backend/data/output/*.sdf
