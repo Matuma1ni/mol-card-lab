@@ -12,7 +12,7 @@ This project is a prototype exploring machine-learned 3D molecular conformer gen
 - Generated molecules should be treated as exploratory artifacts, not validated by PubChem/ChEMBL membership.
 - 3D structure preservation is essential for the frontend visualization.
 - A browser-side chemistry depiction library can support Phase 2 SMILES-to-2D artwork; that depiction is not conformer generation or geometry preservation.
-- A frontend-compatible WASM conformer generator is being developed separately and will be integrated only after its interface is available.
+- Phase 3 uses the available `mlconfgen` JS runtime behind a frontend adapter, subject to proving browser compatibility with an explicit browser ONNX Runtime build and separately supplied weights.
 
 ## Relevant constraints
 
@@ -20,7 +20,7 @@ This project is a prototype exploring machine-learned 3D molecular conformer gen
 - Keep model weights out of source control.
 - Prioritize a small, disposable spike that can be refactored.
 - Do not add full production APIs, database, or authentication in the first phase.
-- Preserve the completed Python spike as the proven Phase 1 path; do not build an interim API while waiting for the frontend-compatible WASM generator.
+- Preserve the completed Python spike as the proven Phase 1 path; do not build an interim API while proving the browser-compatible JS runtime configuration.
 
 ## Future research directions
 

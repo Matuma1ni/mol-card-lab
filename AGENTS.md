@@ -28,8 +28,8 @@ Do not add in Phase 1:
 
 - Phase 1's Python path remains the proven generation/runtime spike.
 - Phase 2 is frontend-only 2D depiction from a fixed local set of 10 SMILES examples.
-- Phase 2.5 is frontend-only 3D visualization.
-- Browser-side generator integration waits for the frontend-compatible WebAssembly library.
+- Phase 3 is frontend-only conformer generation through the `mlconfgen` JS runtime and a small adapter.
+- Phase 4 is frontend-only 3D visualization of Phase 3-generated conformers.
 - RDKit.js/WebAssembly or another suitable browser library may be used for frontend-only 2D depiction from a SMILES string.
 - Any RDKit.js-rendered SVG is card preview/artwork only; it is not the generator, backend connector, or source of 3D geometry.
 - MolBlock remains the primary generated conformer geometry representation for future real 3D visualization, likely with 3Dmol.js.
@@ -37,12 +37,16 @@ Do not add in Phase 1:
 
 ## Current roadmap constraints
 
-- Do not implement or plan an API/backend endpoint for Phase 2 or Phase 2.5.
+- Do not implement or plan an API/backend endpoint for Phases 2–4.
 - Do not add FastAPI, uvicorn, httpx, database, job queue, auth, or deployment work.
 - Keep Phase 2 on the existing local mock/frontend data flow.
-- Keep Phase 2.5 visualization-only; do not integrate conformer generation.
-- For the later WASM phase, define a frontend generator adapter and preserve compatibility with the molecule-card data contract where practical.
-- API work is paused because browser-side WASM generation is the preferred integration path once the updated library is available.
+- Keep Phase 3 browser-side; do not add a backend/API boundary.
+- Phase 3 must import `MLConformerGenerator` and `seed` from `mlconfgen` only inside its adapter boundary. The UI consumes the normalized frontend generator contract, never low-level runtime objects.
+- Phase 3 preserves `mol.toMolBlock()` as authoritative generated geometry; coordinate triples are optional derived UI/debug data.
+- The `mlconfgen` package currently defaults to `onnxruntime-node`. Browser implementation is gated on proving an explicit browser-compatible runtime (such as `onnxruntime-web`), Vite asset handling, and separate ONNX weight delivery work.
+- Model weights (`egnn_chembl_15_39.onnx` and `adj_mat_seer_chembl_15_39.onnx`) are manually obtained, must not be committed, and are not published on npm.
+- Do not plan fixed-fragment inpainting or IFM merge in Phase 3; they are not ported to the JS runtime.
+- API work is paused because browser-side JS/WASM generation is the preferred integration path.
 
 ## Reference molecule handling
 

@@ -1,76 +1,59 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import App, { pickDifferentId } from './App'
+import App from './App'
+import { generateConformers, getGeneratorRuntimeStatus } from './lib/generator'
+import { getPubChemDataBySmiles } from './lib/pubchem'
 
-const reportLoadingBySmiles = new Map<string, (loading: boolean) => void>()
-
-vi.mock('./components/MoleculeCard', () => ({
-  default: ({
-    className,
-    smiles,
-    onLoadingChange,
-  }: {
-    className?: string
-    smiles: string
-    onLoadingChange: (loading: boolean) => void
-  }) => {
-    reportLoadingBySmiles.set(smiles, onLoadingChange)
-    return <article className={className} data-testid="card">{smiles}</article>
-  },
+vi.mock('./lib/generator', () => ({
+  GeneratorError: class GeneratorError extends Error {},
+  generateConformers: vi.fn(),
+  getGeneratorRuntimeStatus: vi.fn(),
 }))
 
+vi.mock('./lib/pubchem', () => ({ getPubChemDataBySmiles: vi.fn() }))
+
+vi.mock('./components/MoleculeCard', () => ({
+  default: ({ smiles }: { smiles?: string }) => <article>{smiles}</article>,
+}))
+
+const statusMock = vi.mocked(getGeneratorRuntimeStatus)
+const generateMock = vi.mocked(generateConformers)
+const pubChemMock = vi.mocked(getPubChemDataBySmiles)
+
 beforeEach(() => {
-  reportLoadingBySmiles.clear()
   vi.restoreAllMocks()
+  statusMock.mockResolvedValue({ status: 'available' })
+  pubChemMock.mockResolvedValue(null)
 })
 
-describe('App selection', () => {
-  it('selects randomly once and keeps the selection across ordinary rerenders', () => {
-    const random = vi.spyOn(Math, 'random').mockReturnValue(0.45)
-    const { rerender } = render(<App />)
-    expect(screen.getByText('COc1ccc2cc([C@@H](C)C(=O)O)ccc2c1')).toBeInTheDocument()
-    rerender(<App />)
-    expect(random).toHaveBeenCalledTimes(1)
-  })
-
-  it('places one Pick another button below the card and disables it while pending', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0)
+describe('App generation', () => {
+  it('requests three internal samples but shows only the first valid result', async () => {
+    generateMock.mockResolvedValue({
+      conformers: [
+        { id: 'generated-1', molBlock: 'first', smiles: 'O' },
+        { id: 'generated-2', molBlock: 'second', smiles: 'N' },
+      ], generationSource: 'mlconfgen-js', numRequested: 3, numGenerated: 2, parameters: { filterInvalid: true },
+    })
     render(<App />)
-    const card = screen.getByTestId('card')
-    const button = screen.getByRole('button', { name: 'Loading…' })
-    expect(card.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(button).toBeDisabled()
-    act(() => reportLoadingBySmiles.get('CC(=O)Oc1ccccc1C(=O)O')?.(false))
-    expect(screen.getByRole('button', { name: 'Pick another' })).toBeEnabled()
-    act(() => reportLoadingBySmiles.get('CC(=O)Oc1ccccc1C(=O)O')?.(true))
-    expect(screen.getByRole('button', { name: 'Loading…' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Generate conformers' }))
+    expect(await screen.findByRole('heading', { name: 'Conformer ready' })).toBeInTheDocument()
+    expect(screen.getByText('O')).toBeInTheDocument()
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Pick another' })).not.toBeInTheDocument()
+    expect(generateMock).toHaveBeenCalledWith({ referenceContext: [89.8693, 210.783, 217.7825], nAtoms: 25, nSamples: 3 })
   })
 
-  it('keeps the previous molecule visible until the next one finishes loading', () => {
-    vi.spyOn(Math, 'random').mockReturnValueOnce(0).mockReturnValueOnce(0)
+  it('prefers a conformer with a PubChem name', async () => {
+    generateMock.mockResolvedValue({
+      conformers: [
+        { id: 'generated-1', molBlock: 'first', smiles: 'O' },
+        { id: 'generated-2', molBlock: 'second', smiles: 'N' },
+      ], generationSource: 'mlconfgen-js', numRequested: 3, numGenerated: 2, parameters: { filterInvalid: true },
+    })
+    pubChemMock.mockResolvedValueOnce(null).mockResolvedValueOnce({ cid: 241, title: 'Ammonia' })
     render(<App />)
-    act(() => reportLoadingBySmiles.get('CC(=O)Oc1ccccc1C(=O)O')?.(false))
-    fireEvent.click(screen.getByRole('button', { name: 'Pick another' }))
-
-    expect(screen.getByText('CC(=O)Oc1ccccc1C(=O)O')).toBeInTheDocument()
-    expect(screen.getByText('CC(=O)Oc1ccccc1C(=O)O').closest('article')).toHaveClass('molecule-card--pending')
-    expect(screen.getByRole('button', { name: 'Loading…' })).toBeDisabled()
-
-    act(() => reportLoadingBySmiles.get('CN1C(=O)N(C)c2ncn(C)c2C1=O')?.(false))
-
-    expect(screen.queryByText('CC(=O)Oc1ccccc1C(=O)O')).not.toBeInTheDocument()
-    expect(screen.getByText('CN1C(=O)N(C)c2ncn(C)c2C1=O')).toBeInTheDocument()
-  })
-})
-
-describe('pickDifferentId', () => {
-  it.each([
-    [0, 0, 'b'],
-    [1, 0, 'a'],
-    [1, 0.99, 'c'],
-    [2, 0.99, 'b'],
-  ])('maps around current index %s', (currentIndex, randomValue, expected) => {
-    vi.spyOn(Math, 'random').mockReturnValue(randomValue)
-    expect(pickDifferentId(['a', 'b', 'c'], ['a', 'b', 'c'][currentIndex])).toBe(expected)
+    fireEvent.click(screen.getByRole('button', { name: 'Generate conformers' }))
+    expect(await screen.findByText('Showing a generated conformer with a PubChem match.')).toBeInTheDocument()
+    expect(screen.getByText('N')).toBeInTheDocument()
   })
 })

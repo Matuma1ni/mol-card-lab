@@ -1,86 +1,110 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import MoleculeCard from './components/MoleculeCard'
 import { getMockSmilesSet } from './data/mockMolecules'
-import { SmilesExample } from './types/molecule'
+import {
+  generateConformers,
+  GeneratorError,
+  getGeneratorRuntimeStatus,
+} from './lib/generator'
+import { getPubChemDataBySmiles } from './lib/pubchem'
+import type { GeneratedConformer } from './types/molecule'
 
-function randomInitialId(moleculeIds: string[]): string {
-  if (moleculeIds.length === 0) return ''
-  return moleculeIds[Math.floor(Math.random() * moleculeIds.length)]
-}
+type GenerationState =
+  | { status: 'ready' }
+  | { status: 'loading-model' }
+  | { status: 'generating' }
+  | { status: 'unavailable' }
+  | { status: 'complete'; pubChemMatch: boolean }
+  | { status: 'zero' }
+  | { status: 'failed' }
 
-export function pickDifferentId(moleculeIds: string[], currentId: string): string {
-  if (moleculeIds.length < 2) return moleculeIds[0] ?? ''
-
-  const currentIndex = moleculeIds.indexOf(currentId)
-  if (currentIndex < 0) return randomInitialId(moleculeIds)
-
-  const otherIndex = Math.floor(Math.random() * (moleculeIds.length - 1))
-  return moleculeIds[otherIndex >= currentIndex ? otherIndex + 1 : otherIndex]
+async function preferPubChemNamedConformer(conformers: GeneratedConformer[]): Promise<{
+  conformer: GeneratedConformer
+  pubChemMatch: boolean
+}> {
+  for (const conformer of conformers) {
+    if ((await getPubChemDataBySmiles(conformer.smiles ?? ''))?.title) {
+      return { conformer, pubChemMatch: true }
+    }
+  }
+  return { conformer: conformers[0], pubChemMatch: false }
 }
 
 function App() {
-  const moleculeSet = getMockSmilesSet()
-  const molecules = moleculeSet.molecules
-  const moleculeIds = molecules.map((molecule) => molecule.id)
-  const [selectedMoleculeId, setSelectedMoleculeId] = useState(() =>
-    randomInitialId(moleculeIds),
-  )
-  const [pendingMoleculeId, setPendingMoleculeId] = useState<string | null>(null)
-  const [cardPending, setCardPending] = useState(true)
+  const selectedMolecule = getMockSmilesSet().molecules[0]
+  const [generation, setGeneration] = useState<GenerationState>({ status: 'ready' })
+  const [generated, setGenerated] = useState<GeneratedConformer | null>(null)
+  const requestId = useRef(0)
+  const statusHeading = useRef<HTMLHeadingElement>(null)
+  const generating = generation.status === 'loading-model' || generation.status === 'generating'
 
-  const selectedMolecule: SmilesExample | undefined = molecules.find(
-    (molecule) => molecule.id === selectedMoleculeId
-  ) || molecules[0]
-  const pendingMolecule: SmilesExample | undefined = pendingMoleculeId
-    ? molecules.find((molecule) => molecule.id === pendingMoleculeId)
-    : undefined
+  useEffect(() => {
+    if (generation.status !== 'ready') statusHeading.current?.focus()
+  }, [generation.status])
+
+  async function requestGeneration() {
+    if (!selectedMolecule || generating) return
+    const { referenceContext, nAtoms } = selectedMolecule
+    if (!Array.isArray(referenceContext) || referenceContext.length !== 3 || !referenceContext.every(Number.isFinite) || !Number.isInteger(nAtoms) || nAtoms <= 0) {
+      setGeneration({ status: 'failed' })
+      return
+    }
+    const currentRequest = ++requestId.current
+    setGeneration({ status: 'loading-model' })
+    const runtime = await getGeneratorRuntimeStatus()
+    if (currentRequest !== requestId.current) return
+    if (runtime.status === 'unavailable') {
+      setGeneration({ status: 'unavailable' })
+      return
+    }
+    setGeneration({ status: 'generating' })
+    try {
+      const result = await generateConformers({ referenceContext, nAtoms, nSamples: 3 })
+      if (currentRequest !== requestId.current) return
+      if (result.numGenerated === 0) {
+        setGeneration({ status: 'zero' })
+        return
+      }
+      const preferred = await preferPubChemNamedConformer(result.conformers)
+      if (currentRequest !== requestId.current) return
+      setGenerated(preferred.conformer)
+      setGeneration({ status: 'complete', pubChemMatch: preferred.pubChemMatch })
+    } catch (error) {
+      if (currentRequest !== requestId.current) return
+      setGeneration({ status: error instanceof GeneratorError ? 'failed' : 'unavailable' })
+    }
+  }
+
+  const statusCopy = generation.status === 'loading-model'
+    ? ['Preparing generator…', 'Loading the model.']
+    : generation.status === 'generating'
+      ? ['Generating conformer…', 'Finding a valid structure.']
+      : generation.status === 'unavailable'
+        ? ['Generator unavailable', 'A compatible browser runtime is required.']
+        : generation.status === 'failed'
+          ? ['Generation could not complete', 'Try again. Your current card remains available.']
+          : generation.status === 'zero'
+            ? ['No valid conformer returned', 'Try again. Your current card remains available.']
+            : generation.status === 'complete'
+              ? ['Conformer ready', generation.pubChemMatch
+                ? 'Showing a generated conformer with a PubChem match.'
+                : 'Showing the first valid generated conformer.']
+              : ['Ready', '']
 
   return (
     <div className="app">
-      {/* Header */}
-      <header className="app-header">
-        <h1>mol-card-lab</h1>
-      </header>
-
+      <header className="app-header"><h1>mol-card-lab</h1></header>
       <main className="app-container">
-        <section className="card-stage" aria-label="Selected molecule card">
-          {selectedMolecule && (
-            <>
-              <MoleculeCard
-                smiles={selectedMolecule.smiles}
-                className={pendingMolecule ? 'molecule-card--pending' : undefined}
-                onLoadingChange={setCardPending}
-              />
-              {pendingMolecule && (
-                <div className="card-preloader" aria-hidden="true">
-                  <MoleculeCard
-                    smiles={pendingMolecule.smiles}
-                    onLoadingChange={(loading) => {
-                      if (loading) return
-                      setSelectedMoleculeId(pendingMolecule.id)
-                      setPendingMoleculeId(null)
-                    }}
-                  />
-                </div>
-              )}
-              <button
-                className={
-                  cardPending || pendingMolecule
-                    ? 'pick-another-button pick-another-button--loading'
-                    : 'pick-another-button'
-                }
-                type="button"
-                disabled={cardPending || Boolean(pendingMolecule)}
-                aria-busy={cardPending || pendingMolecule ? 'true' : undefined}
-                onClick={() => {
-                  const nextId = pickDifferentId(moleculeIds, selectedMoleculeId)
-                  if (nextId) setPendingMoleculeId(nextId)
-                }}
-              >
-                {cardPending || pendingMolecule ? 'Loading…' : 'Pick another'}
-              </button>
-            </>
-          )}
+        <section className="card-stage" aria-label="Generated molecule card">
+          {selectedMolecule && <>
+            <MoleculeCard smiles={generated?.smiles ?? selectedMolecule.smiles} molBlock={generated?.molBlock} />
+            <section className="generation-status" role={generation.status === 'failed' ? 'alert' : 'status'} aria-labelledby="generation-status-heading">
+              <h2 id="generation-status-heading" ref={statusHeading} tabIndex={-1}>{statusCopy[0]}</h2>{statusCopy[1] && <p>{statusCopy[1]}</p>}
+            </section>
+            <button className="generate-conformers-button" type="button" disabled={generating} aria-busy={generating || undefined} onClick={requestGeneration}>
+              {generating ? statusCopy[0] : generation.status === 'failed' || generation.status === 'zero' ? 'Try again' : 'Generate conformers'}
+            </button>
+          </>}
         </section>
       </main>
     </div>

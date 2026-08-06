@@ -1,5 +1,6 @@
 interface RDKitMolecule {
   get_svg(): string
+  get_smiles(): string
   delete(): void
 }
 
@@ -87,11 +88,11 @@ export function loadRDKit(): Promise<RDKitModule> {
   return modulePromise
 }
 
-export async function renderSmilesToSvg(smiles: string): Promise<RenderSmilesResult> {
+async function renderMoleculeToSvg(source: string): Promise<RenderSmilesResult> {
   const rdkit = await loadRDKit()
   let molecule: RDKitMolecule | null
   try {
-    molecule = rdkit.get_mol(smiles)
+    molecule = rdkit.get_mol(source)
   } catch {
     return { status: 'invalid' }
   }
@@ -99,6 +100,31 @@ export async function renderSmilesToSvg(smiles: string): Promise<RenderSmilesRes
 
   try {
     return { status: 'success', svg: molecule.get_svg() }
+  } finally {
+    molecule.delete()
+  }
+}
+
+export function renderSmilesToSvg(smiles: string): Promise<RenderSmilesResult> {
+  return renderMoleculeToSvg(smiles)
+}
+
+export function renderMolBlockToSvg(molBlock: string): Promise<RenderSmilesResult> {
+  return renderMoleculeToSvg(molBlock)
+}
+
+export async function smilesFromMolBlock(molBlock: string): Promise<string | undefined> {
+  const rdkit = await loadRDKit()
+  let molecule: RDKitMolecule | null
+  try {
+    molecule = rdkit.get_mol(molBlock)
+  } catch {
+    return undefined
+  }
+  if (!molecule) return undefined
+
+  try {
+    return molecule.get_smiles().trim() || undefined
   } finally {
     molecule.delete()
   }

@@ -2,7 +2,7 @@
 
 ## Planning state
 
-Phase 1 is complete and committed on `main`. It established the standalone Python generation spike, MolBlock-first conformer JSON, and a mock-driven React card UI with placeholder visualization. The roadmap is now frontend-first: Phase 2 adds RDKit.js 2D depiction, Phase 3 integrates browser-side WASM generation, and Phase 4 visualizes the actual generated conformers in 3D.
+Phase 1 is complete and committed on `main`. It established the standalone Python generation spike, MolBlock-first conformer JSON, and a mock-driven React card UI with placeholder visualization. The roadmap is now frontend-first: Phase 2 adds RDKit.js 2D depiction, Phase 3 integrates browser-side generation through the `mlconfgen` JS runtime, and Phase 4 visualizes the actual generated conformers in 3D.
 
 ## Phase 1: Spike the core data flow — complete
 
@@ -45,18 +45,22 @@ Goal: Replace or improve the placeholder card artwork with real 2D SVG depiction
 - Selection changes update the depiction without spreading RDKit.js lifecycle code through the app.
 - The interaction is clearly random selection from predefined molecules, not random molecule generation.
 
-## Phase 3: Frontend WASM generation integration
+## Phase 3: JS runtime / WASM-compatible conformer generation
 
-Goal: Integrate the frontend-compatible conformer-generation library after it is available, keeping generation browser-side and hiding low-level WASM details behind a frontend adapter.
+Goal: Integrate the `mlconfgen` JS runtime into the frontend architecture behind a small adapter, keeping generation local to the browser and low-level ONNX/RDKit details out of UI components.
 
 ### In scope
 
-- Define a small frontend generator adapter/interface around the delivered WASM module.
-- Accept the agreed minimum generation input through that adapter.
+- Browser-runtime proof before UI work: prove that `mlconfgen` can use an explicitly supplied browser ONNX Runtime build (for example `onnxruntime-web`), including its RDKit dependency and Vite asset handling. The package currently defaults to `onnxruntime-node` and Node 18+.
+- Define a small frontend generator adapter/interface around `mlconfgen`.
+- Obtain, configure, and keep out of git the separately distributed `egnn_chembl_15_39.onnx` and `adj_mat_seer_chembl_15_39.onnx` model files.
+- Create the generator with `MLConformerGenerator.create({ egnnOnnx, adjMatSeerOnnx, diffusionSteps })`, using `MLConformerGenerator` and `seed` imported from `mlconfgen` only inside the adapter.
+- Support the minimum request input: `nSamples`, optional `variance` / `diffusionSteps`, either `referenceContext` with `nAtoms` or `referenceConformer.positions`.
 - Normalize generator output into a frontend molecule/conformer shape compatible with existing cards where practical.
-- Add module-loading, generation-in-progress, success, and failure states.
+- Preserve `mol.toMolBlock()` as authoritative geometry. Derive coordinate triples only when practical for UI/debug use.
+- Add model-loading, generation-in-progress, partial-result, success, and failure states. `filterInvalid` is `true` by default, so a successful response can contain fewer conformers than requested.
 - Prove that generated results can flow into existing card selection/rendering without major UI rewrites.
-- Preserve MolBlock or the library's authoritative 3D geometry representation in normalized output.
+- Record the confirmed geometry and browser-runtime contract for Phase 4.
 
 ### Out of scope
 
@@ -64,12 +68,16 @@ Goal: Integrate the frontend-compatible conformer-generation library after it is
 - FastAPI, uvicorn, httpx, database, job queue, auth, or deployment
 - 3D visualization except a minimal non-viewer smoke check if required to verify output presence
 - Advanced generation controls beyond the minimum integration proof
+- Fixed-fragment inpainting / IFM merge, which are not ported from the Python API
+- Model training or fine-tune adapter work
 
 ### Deliverables and acceptance criteria
 
-- UI code requests generation only through the adapter, not directly through low-level WASM APIs.
-- The adapter returns normalized molecule/conformer records suitable for the current card flow.
-- WASM loading and generation failures produce graceful, actionable UI states.
+- UI code requests generation only through the adapter, not `mlconfgen`, ONNX Runtime, RDKit, or model-path APIs.
+- The adapter returns the documented normalized request/response shape suitable for the current card flow.
+- The browser proof records the selected ONNX Runtime build, model-asset loading approach, and any browser limitations before UI integration.
+- `mol.toMolBlock()` is retained for every normalized conformer; optional coordinates do not replace it.
+- Model-loading and generation failures produce graceful, actionable UI states; an invalid-filtered short result is distinguishable from failure.
 - Generation runs locally in the browser with no backend boundary.
 - The output geometry contract is documented for Phase 4.
 
@@ -120,11 +128,11 @@ Phase 2 will likely touch:
 Phase 3 will likely add or update:
 
 - a frontend generator adapter/interface module
-- WASM module declarations/assets and loader configuration
+- ONNX Runtime and model-asset configuration required by the browser proof
 - `frontend/src/App.tsx` and molecule/conformer types
 - generation-state UI and focused adapter/integration tests
 
-Exact files depend on the delivered library interface and should not be guessed in advance.
+Exact paths beyond the adapter boundary depend on the browser proof and should not be guessed in advance.
 
 Phase 4 will likely touch:
 
@@ -143,7 +151,7 @@ npm run build
 npm run lint
 ```
 
-When tests are added, run the exact test script declared in `frontend/package.json`. Phase 2 manual checks should cover all 10 examples, loading, invalid SMILES, and selection. Phase 3 should cover WASM load/generation success and failure plus adapter normalization. Phase 4 should cover generated geometry, conformer switching, invalid/missing geometry, and missing WebGL.
+When tests are added, run the exact test script declared in `frontend/package.json`. Phase 2 manual checks should cover all 10 examples, loading, invalid SMILES, and selection. Phase 3 should cover browser-runtime/model loading, generation success and failure, filtered partial results, both supported reference-input forms, and adapter normalization. Phase 4 should cover generated geometry, conformer switching, invalid/missing geometry, and missing WebGL.
 
 ## Existing contradictions and gaps found
 

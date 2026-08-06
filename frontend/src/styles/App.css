@@ -40,56 +40,42 @@
   padding-top: var(--spacing-lg);
 }
 
-.pick-another-button {
-  min-width: 10rem;
+
+.generation-status {
+  width: 100%;
   margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  border: 1px solid #d9ddd3;
+  border-radius: 0.5rem;
+  background: #e3e9dd;
+}
+
+.generation-status h2 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.generation-status p {
+  margin: var(--spacing-sm) 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.generate-conformers-button {
+  width: 100%;
+  min-height: 44px;
+  margin-top: var(--spacing-sm);
   border: 1px solid #31583d;
+  border-radius: 0.5rem;
   background: #557c62;
   color: #ffffff;
   font-weight: 700;
 }
 
-.pick-another-button:disabled {
-  cursor: wait;
+.generate-conformers-button:disabled {
+  cursor: not-allowed;
   opacity: 0.55;
-}
-
-.pick-another-button--loading {
-  position: relative;
-  padding-left: 2.25rem;
-}
-
-.pick-another-button--loading::before {
-  position: absolute;
-  left: var(--spacing-md);
-  top: 50%;
-  width: 0.8rem;
-  height: 0.8rem;
-  margin-top: -0.4rem;
-  border: 2px solid rgba(255, 255, 255, 0.45);
-  border-top-color: #ffffff;
-  border-radius: 999px;
-  content: '';
-  animation: pick-another-spin 0.75s linear infinite;
-}
-
-.card-preloader {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.molecule-card--pending {
-  opacity: 0.55;
-}
-
-@keyframes pick-another-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 @media (max-width: 720px) {

@@ -9,6 +9,8 @@ describe('local molecule catalog', () => {
     for (const molecule of MOCK_SMILES_EXAMPLES) {
       expect(molecule.id.trim()).not.toBe('')
       expect(molecule.smiles.trim()).not.toBe('')
+      expect(molecule.nAtoms).toBeGreaterThanOrEqual(25)
+      expect(molecule.nAtoms).toBeLessThanOrEqual(32)
     }
 
     for (const field of ['id', 'smiles'] as const) {

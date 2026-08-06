@@ -1,11 +1,12 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Molecule2DPreview from './Molecule2DPreview'
-import { renderSmilesToSvg } from '../lib/rdkit'
+import { renderMolBlockToSvg, renderSmilesToSvg } from '../lib/rdkit'
 
-vi.mock('../lib/rdkit', () => ({ renderSmilesToSvg: vi.fn() }))
+vi.mock('../lib/rdkit', () => ({ renderMolBlockToSvg: vi.fn(), renderSmilesToSvg: vi.fn() }))
 
 const renderMock = vi.mocked(renderSmilesToSvg)
+const renderMolBlockMock = vi.mocked(renderMolBlockToSvg)
 
 function deferred<T>() {
   let resolve!: (value: T) => void
@@ -17,6 +18,7 @@ function deferred<T>() {
 
 beforeEach(() => {
   renderMock.mockReset()
+  renderMolBlockMock.mockReset()
 })
 
 describe('Molecule2DPreview', () => {
@@ -34,6 +36,14 @@ describe('Molecule2DPreview', () => {
     renderMock.mockResolvedValue({ status: 'success', svg: '<svg data-testid="depiction" />' })
     render(<Molecule2DPreview smiles="CCO" />)
     expect(await screen.findByTestId('depiction')).toBeInTheDocument()
+  })
+
+  it('renders a generated MolBlock instead of its SMILES fallback', async () => {
+    renderMolBlockMock.mockResolvedValue({ status: 'success', svg: '<svg data-testid="generated-depiction" />' })
+    render(<Molecule2DPreview smiles="CCO" molBlock="generated molblock" />)
+    expect(await screen.findByTestId('generated-depiction')).toBeInTheDocument()
+    expect(renderMolBlockMock).toHaveBeenCalledWith('generated molblock')
+    expect(renderMock).not.toHaveBeenCalled()
   })
 
   it('shows invalid SMILES without raw errors or retry', async () => {

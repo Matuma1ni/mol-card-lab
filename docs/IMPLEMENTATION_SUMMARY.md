@@ -15,7 +15,7 @@ Completed the initial scaffold for a molecular conformer generation + visualizat
 - **React Frontend**: Card-based UI for browsing generated 3D molecular conformers
 - **Clean Separation**: Backend generates data, frontend consumes mock/real data as JSON
 
-Phase 1 is complete. The follow-on direction is frontend-first: Phase 2 adds RDKit.js SVG depiction from 10 fixed local SMILES examples, Phase 3 integrates the frontend-compatible WASM generator, and Phase 4 visualizes actual generated conformers after their geometry format is known.
+Phase 1 is complete. The follow-on direction is frontend-first: Phase 2 adds RDKit.js SVG depiction from 10 fixed local SMILES examples, Phase 3 integrates the `mlconfgen` JS runtime behind a browser-facing adapter, and Phase 4 visualizes actual generated conformers after their geometry format is confirmed.
 
 ---
 
@@ -266,10 +266,10 @@ vite@^4.4.0
 - [ ] Show one selected card with simple cycling/random selection
 - [ ] Keep the phase frontend-only and reuse the current card flow
 
-### Phase 3: frontend WASM generation integration
-- [ ] Wait for the frontend-compatible generator interface
-- [ ] Add a frontend generator adapter
-- [ ] Map output to the existing molecule-card contract where practical
+### Phase 3: JS runtime / WASM-compatible generation integration
+- [ ] Prove `mlconfgen` with an explicit browser ONNX Runtime build and separately obtained ONNX assets
+- [ ] Add a frontend generator adapter that owns `MLConformerGenerator`, `seed`, and runtime details
+- [ ] Map `generateConformers` output through `mol.toMolBlock()` to the existing molecule-card contract where practical
 
 ### Phase 4: 3D visualization of generated conformers
 - [ ] Select a viewer after Phase 3 confirms the geometry format

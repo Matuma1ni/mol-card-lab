@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-`mol-card-lab` is an exploratory prototype for generating and visualizing molecular structures as collectible card-style assets. Phase 1 validated the Python `ml_conformer_generator` path, preserved 3D conformer coordinates in serialization, and established a React/Vite UI with mock molecule data. Current work is frontend-first: Phase 2 adds RDKit.js 2D depiction from SMILES, Phase 3 integrates the browser-compatible WASM generator, and Phase 4 visualizes actual generated conformers in 3D.
+`mol-card-lab` is an exploratory prototype for generating and visualizing molecular structures as collectible card-style assets. Phase 1 validated the Python `ml_conformer_generator` path, preserved 3D conformer coordinates in serialization, and established a React/Vite UI with mock molecule data. Current work is frontend-first: Phase 2 adds RDKit.js 2D depiction from SMILES, Phase 3 integrates the `mlconfgen` JS runtime through a browser-compatible ONNX Runtime build, and Phase 4 visualizes actual generated conformers in 3D.
 
 ## Mission
 
@@ -10,7 +10,7 @@ Create a clean, maintainable prototype that preserves the proven Phase 1 data co
 - reference molecule -> `mlconfgen` conformer generation -> 3D-aware serialization
 - mocked frontend experience using realistic molecule data
 - SMILES -> RDKit.js SVG card depiction in Phase 2
-- frontend generator adapter -> WASM generation in Phase 3
+- frontend generator adapter -> `mlconfgen` JS/ONNX generation in Phase 3
 - generated geometry -> 3D viewer in Phase 4
 
 ## Project Goals
@@ -20,7 +20,7 @@ Create a clean, maintainable prototype that preserves the proven Phase 1 data co
 - Keep the first slice simple and disposable
 - Keep Phases 2–4 frontend-first and independent of an API
 - Treat a 2D depiction library as artwork, not generated 3D geometry
-- Defer generator integration until the frontend-compatible WASM library is available
+- Use `mlconfgen` only behind a frontend adapter and prove its browser-compatible runtime configuration before wiring it into the UI
 - Avoid treating PubChem/ChEMBL lookup as chemical validation
 
 ## Audience

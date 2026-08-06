@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { renderSmilesToSvg } from '../lib/rdkit'
+import { renderMolBlockToSvg, renderSmilesToSvg } from '../lib/rdkit'
 import '../styles/Molecule2DPreview.css'
 
 interface Molecule2DPreviewProps {
-  smiles: string
+  smiles?: string
+  molBlock?: string
   onLoadingChange?: (loading: boolean) => void
 }
 
@@ -15,6 +16,7 @@ type PreviewState =
 
 export const Molecule2DPreview: React.FC<Molecule2DPreviewProps> = ({
   smiles,
+  molBlock,
   onLoadingChange,
 }) => {
   const [state, setState] = useState<PreviewState>({ status: 'loading' })
@@ -22,10 +24,16 @@ export const Molecule2DPreview: React.FC<Molecule2DPreviewProps> = ({
 
   useEffect(() => {
     let current = true
+    if (!smiles && !molBlock) {
+      setState({ status: 'invalid' })
+      onLoadingChange?.(false)
+      return () => { current = false }
+    }
     setState({ status: 'loading' })
     onLoadingChange?.(true)
 
-    renderSmilesToSvg(smiles)
+    const render = molBlock ? renderMolBlockToSvg(molBlock) : renderSmilesToSvg(smiles!)
+    render
       .then((result) => {
         if (!current) return
         setState(
@@ -44,7 +52,7 @@ export const Molecule2DPreview: React.FC<Molecule2DPreviewProps> = ({
     return () => {
       current = false
     }
-  }, [attempt, onLoadingChange, smiles])
+  }, [attempt, molBlock, onLoadingChange, smiles])
 
   if (state.status === 'loading') {
     return (
@@ -67,7 +75,7 @@ export const Molecule2DPreview: React.FC<Molecule2DPreviewProps> = ({
   return (
     <div className="molecule-2d-preview molecule-2d-preview--fallback" aria-label="Molecule artwork">
       <strong>2D preview unavailable</strong>
-      <span className="molecule-2d-preview__smiles">{smiles}</span>
+      {smiles && <span className="molecule-2d-preview__smiles">{smiles}</span>}
       {state.status === 'error' && (
         <button type="button" onClick={() => setAttempt((value) => value + 1)}>
           Retry preview

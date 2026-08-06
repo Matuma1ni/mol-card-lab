@@ -2,7 +2,7 @@
 
 ## Current direction
 
-Phase 1 is complete. Phase 2 is RDKit.js 2D visualization from SMILES, Phase 3 is browser-side WASM generation integration, and Phase 4 is 3D visualization of actual generated conformers after their geometry format is known. No API is required for these phases.
+Phase 1 is complete. Phase 2 is RDKit.js 2D visualization from SMILES, Phase 3 is browser-side `mlconfgen` JS runtime integration, and Phase 4 is 3D visualization of actual generated conformers after their geometry format is confirmed. No API is required for these phases.
 
 ## Scope for Phase 1
 
@@ -56,14 +56,17 @@ The first phase must deliver a minimally viable conformer generation and visuali
 - No FastAPI, uvicorn, httpx, database, job queue, auth, deployment, or PubChem/ChEMBL lookup.
 - A SMILES-derived depiction is 2D artwork and is not the source of 3D geometry.
 
-## Phase 3 requirements: frontend WASM generation
+## Phase 3 requirements: frontend JS runtime generation
 
-1. Wait for the frontend-compatible generator and its interface before finalizing implementation details.
-2. Put the library behind a frontend generator adapter/interface.
-3. Keep adapter output compatible with the existing molecule-card data shape where practical.
-4. Keep generation browser-side and provide module-loading and generation failure states.
-5. Document the authoritative generated geometry format for Phase 4.
-6. Exclude backend/API work, persistence, deployment, and advanced generation controls.
+1. Install the generator package as `mlconfgen` and keep imports of `MLConformerGenerator` and `seed` inside a frontend generator adapter.
+2. Prove the browser build before UI integration: explicitly pass a browser-compatible ONNX Runtime build (for example `onnxruntime-web`), load both ONNX files as browser assets, and document the supported browser/runtime result. The package's default `onnxruntime-node` dependency is not itself a browser implementation.
+3. Create the generator with `MLConformerGenerator.create({ egnnOnnx, adjMatSeerOnnx, diffusionSteps })`; obtain `egnn_chembl_15_39.onnx` and `adj_mat_seer_chembl_15_39.onnx` separately because they are not published on npm, and never commit them.
+4. Expose only the documented frontend `GenerateRequest` / `GenerateResponse` contract to UI code. The adapter translates `referenceContext` plus `nAtoms`, or `referenceConformer.positions`, into `generateConformers` calls.
+5. Normalize every generated molecule using `mol.toMolBlock()` as required authoritative geometry. Coordinates are optional derived UI/debug data; SMILES is optional metadata, not a replacement for geometry.
+6. Preserve requested and generated counts. Because `filterInvalid` defaults to `true`, fewer conformers than requested is a valid successful response and must be communicated in response metadata/UI state.
+7. Keep generation local to the browser, with intentional model-loading, generation, partial-result, and failure states. Do not add HTTP generation requests.
+8. Do not include fixed-fragment inpainting or IFM merge; those Python API features are not ported to the JS runtime.
+9. Exclude backend/API work, persistence, deployment, model training/fine-tuning, and advanced controls beyond the stated request contract.
 
 ## Phase 4 requirements: generated-conformer 3D visualization
 
