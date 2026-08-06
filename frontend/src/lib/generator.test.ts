@@ -52,7 +52,7 @@ describe('getGeneratorRuntimeStatus', () => {
     await expect(first).resolves.toEqual({ status: 'available' })
     await expect(second).resolves.toEqual({ status: 'available' })
     expect(createGeneratorMock).toHaveBeenCalledOnce()
-    expect(seedMock).toHaveBeenCalledWith()
+    expect(seedMock).toHaveBeenCalledWith(expect.any(Number))
     expect(createGeneratorMock).toHaveBeenCalledWith(expect.objectContaining({
       egnnOnnx: '/models/egnn_chembl_15_39.onnx',
       adjMatSeerOnnx: '/models/adj_mat_seer_chembl_15_39.onnx',

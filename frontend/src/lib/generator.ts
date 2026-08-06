@@ -51,7 +51,7 @@ function loadGenerator(): Promise<Generator> {
 
   generatorPromise = requireModelAssets()
     .then(() => {
-      seed()
+      seed(Date.now())
       return createGenerator({
         ort,
         rdkitLoader: loadRDKit,

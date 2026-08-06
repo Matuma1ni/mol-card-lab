@@ -40,51 +40,6 @@
   padding-top: var(--spacing-lg);
 }
 
-.pick-another-button {
-  min-width: 10rem;
-  margin-top: var(--spacing-lg);
-  border: 1px solid #31583d;
-  background: #557c62;
-  color: #ffffff;
-  font-weight: 700;
-}
-
-.pick-another-button:disabled {
-  cursor: wait;
-  opacity: 0.55;
-}
-
-.pick-another-button--loading {
-  position: relative;
-  padding-left: 2.25rem;
-}
-
-.pick-another-button--loading::before {
-  position: absolute;
-  left: var(--spacing-md);
-  top: 50%;
-  width: 0.8rem;
-  height: 0.8rem;
-  margin-top: -0.4rem;
-  border: 2px solid rgba(255, 255, 255, 0.45);
-  border-top-color: #ffffff;
-  border-radius: 999px;
-  content: '';
-  animation: pick-another-spin 0.75s linear infinite;
-}
-
-.card-preloader {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.molecule-card--pending {
-  opacity: 0.55;
-}
 
 .generation-status {
   width: 100%;
@@ -121,32 +76,6 @@
 .generate-conformers-button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
-}
-
-.generated-selector {
-  display: grid;
-  width: 100%;
-  gap: var(--spacing-sm);
-  margin-top: var(--spacing-md);
-  font-weight: 700;
-}
-
-.generated-selector select {
-  min-height: 44px;
-  border: 1px solid #31583d;
-  border-radius: 0.5rem;
-  background: #ffffff;
-  color: #20231f;
-}
-
-@keyframes pick-another-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pick-another-button--loading::before { animation: none; }
 }
 
 @media (max-width: 720px) {
